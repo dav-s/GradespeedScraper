@@ -47,7 +47,6 @@ passwrdCtrl = br.form.find_control("txtPassword")
 userCtrl.value = userNm
 passwrdCtrl.value = passWd
 
-
 response = br.submit()
 
 
@@ -56,8 +55,10 @@ br.select_form("aspnetForm")
 studC = br.form.find_control(nr=10)
 
 for options in studC.items:
-    
-    studC=options
+
+    br.select_form("aspnetForm")
+    studCaux = br.form.find_control(nr=10)
+    studCaux.value = [options.name]
     br.submit()
     
     oGrade = br.follow_link(text_regex="Grades")
