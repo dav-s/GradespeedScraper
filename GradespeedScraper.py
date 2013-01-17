@@ -1,4 +1,6 @@
-import mechanize
+from bs4 import BeautifulSoup
+import mechanize, re
+
 
 def decodeString(inpt):
     keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
@@ -27,6 +29,9 @@ def decodeString(inpt):
             output = output + chr(chr3)
     return output
 
+userNm = raw_input("Enter Username: ")
+passWd = raw_input("Enter Password: ")
+
 
 br = mechanize.Browser()
 br.set_handle_robots(False)
@@ -39,21 +44,32 @@ br.select_form("Form1")
 userCtrl = br.form.find_control("txtUserName")
 passwrdCtrl = br.form.find_control("txtPassword")
 
-userCtrl.value=raw_input("Enter Username: ")
-passwrdCtrl.value = raw_input("Enter Password: ")
+userCtrl.value = userNm
+passwrdCtrl.value = passWd
+
+
 
 response = br.submit()
 
-br.select_form("aspnetForm")
+
 
 oGrade = br.follow_link(text_regex="Grades")
 oPage = oGrade.read()
 narrowed = oPage.split("'")
 code = narrowed[19]+narrowed[21]+narrowed[23]+narrowed[25]+narrowed[27]+narrowed[29]+narrowed[31]+narrowed[33]+narrowed[35]+narrowed[37]+narrowed[39]
 
+br.select_form("aspnetForm")
+
+for control in br.form.controls:
+    print control
+    print "type=%s, name=%s value=%s" % (control.type, control.name, br[control.name])
+
 rawhtml = decodeString(code)
-print rawhtml
+woU8 = rawhtml.replace("&nbsp;","")
 
+getTableDat = BeautifulSoup(woU8)
+getTableDat.prettify()
+indexList = getTableDat.findAll("td")
 
-
-
+for rows in indexList:
+    print rows.contents
