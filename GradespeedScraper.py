@@ -64,11 +64,11 @@ for options in studC.items:
     oGrade = br.follow_link(text_regex="Grades")
     oPage = oGrade.read()
     narrowed = oPage.split("'")
-    code = narrowed[19]+narrowed[21]+narrowed[23]+narrowed[25]+narrowed[27]+narrowed[29]+narrowed[31]+narrowed[33]+narrowed[35]+narrowed[37]+narrowed[39]
+    code = narrowed[19]+narrowed[21]+narrowed[23]+narrowed[25]+narrowed[27]+narrowed[29]+narrowed[31]+narrowed[33]+narrowed[35]+narrowed[37]+narrowed[39]+narrowed[41]
     
     rawhtml = decodeString(code)
     woU8 = rawhtml.replace("&nbsp;","")
-    
+
     getTableDat = BeautifulSoup(woU8)
     getTableDat.prettify()
     indexList = getTableDat.findAll("td")
@@ -80,7 +80,7 @@ for options in studC.items:
     
     matric = []
     
-    for i in range(7):
+    for i in range(len(extracted)/12):
         holder = []
         for j in range(12):
             try:
