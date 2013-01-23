@@ -65,8 +65,11 @@ def netStuff(userNm, passWd):
         
         oGrade = br.follow_link(text_regex="Grades")
         oPage = oGrade.read()
-        narrowed = oPage.split("'")
-        code = narrowed[19]+narrowed[21]+narrowed[23]+narrowed[25]+narrowed[27]+narrowed[29]+narrowed[31]+narrowed[33]+narrowed[35]+narrowed[37]+narrowed[39]+narrowed[41]
+        narrowed = oPage.split("var")[3].split("document.write")[0].split("'")
+        code=""
+        for i in range(3,len(narrowed)):
+            if i%2==1:
+                code=code+narrowed[i]
         
         rawhtml = decodeString(code)
         woU8 = rawhtml.replace("&nbsp;","")
