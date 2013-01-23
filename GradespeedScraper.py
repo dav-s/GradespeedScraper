@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
+from Tkinter import *
 import mechanize, re
-
 
 def decodeString(inpt):
     keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
@@ -29,67 +29,96 @@ def decodeString(inpt):
             output = output + chr(chr3)
     return output
 
-userNm = raw_input("Enter Username: ")
-passWd = raw_input("Enter Password: ")
+def netStuff(userNm, passWd):
+    cj = mechanize.CookieJar()
+    br = mechanize.Browser()
+    br.set_cookiejar(cj)
+    br.set_handle_robots(False)
+    br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0')]
+    
+    br.open("https://gradespeed.kleinisd.net/pc/Default.aspx")
+    
+    br.select_form("Form1")
+    
+    userCtrl = br.form.find_control("txtUserName")
+    passwrdCtrl = br.form.find_control("txtPassword")
+    
+    userCtrl.value = userNm
+    passwrdCtrl.value = passWd
 
-
-br = mechanize.Browser()
-br.set_handle_robots(False)
-br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0')]
-
-br.open("https://gradespeed.kleinisd.net/pc/Default.aspx")
-
-br.select_form("Form1")
-
-userCtrl = br.form.find_control("txtUserName")
-passwrdCtrl = br.form.find_control("txtPassword")
-
-userCtrl.value = userNm
-passwrdCtrl.value = passWd
-
-response = br.submit()
-
-
-br.select_form("aspnetForm")
-
-studC = br.form.find_control(nr=10)
-
-for options in studC.items:
-
+    response = br.submit()
+    
+    
     br.select_form("aspnetForm")
-    studCaux = br.form.find_control(nr=10)
-    studCaux.value = [options.name]
-    br.submit()
-    
-    oGrade = br.follow_link(text_regex="Grades")
-    oPage = oGrade.read()
-    narrowed = oPage.split("'")
-    code = narrowed[19]+narrowed[21]+narrowed[23]+narrowed[25]+narrowed[27]+narrowed[29]+narrowed[31]+narrowed[33]+narrowed[35]+narrowed[37]+narrowed[39]+narrowed[41]
-    
-    rawhtml = decodeString(code)
-    woU8 = rawhtml.replace("&nbsp;","")
 
-    getTableDat = BeautifulSoup(woU8)
-    getTableDat.prettify()
-    indexList = getTableDat.findAll("td")
-    
-    extracted = []
-    
-    for rows in indexList:
-        extracted.append(rows.contents)
-    
-    matric = []
-    
-    for i in range(len(extracted)/12):
-        holder = []
-        for j in range(12):
-            try:
-                holder.append(extracted[i*12+j])
-            except Exception:
-                holder.append([])
-        matric.append(holder)
-    
-    for rows in matric:
-        for columns in rows:
-            print columns
+    studC = br.form.find_control(nr=10)
+
+    for options in studC.items:
+        
+        print options.name
         print
+    
+        br.select_form("aspnetForm")
+        studCaux = br.form.find_control(nr=10)
+        studCaux.value = [options.name]
+        br.submit()
+        
+        oGrade = br.follow_link(text_regex="Grades")
+        oPage = oGrade.read()
+        narrowed = oPage.split("'")
+        code = narrowed[19]+narrowed[21]+narrowed[23]+narrowed[25]+narrowed[27]+narrowed[29]+narrowed[31]+narrowed[33]+narrowed[35]+narrowed[37]+narrowed[39]+narrowed[41]
+        
+        rawhtml = decodeString(code)
+        woU8 = rawhtml.replace("&nbsp;","")
+
+        getTableDat = BeautifulSoup(woU8)
+        getTableDat.prettify()
+        indexList = getTableDat.findAll("td")
+        
+        extracted = []
+    
+        for rows in indexList:
+            extracted.append(rows.contents)
+       
+        matric = []
+    
+        for i in range(len(extracted)/12):
+            holder = []
+            for j in range(12):
+                try:
+                    holder.append(extracted[i*12+j])
+                except Exception:
+                    holder.append([])
+            matric.append(holder)
+        
+        for rows in matric:
+            for columns in rows:
+                print columns
+            print
+
+
+
+def getLogin():
+    uTemp=userHold.get()
+    pTemp=passHold.get()
+    logGUI.destroy()
+    netStuff(uTemp,pTemp)
+    return
+
+logGUI = Tk()
+logGUI.geometry("200x200+250+250")
+logGUI.title("Login Window")
+Label(logGUI,text="").pack()
+logSign = Label(logGUI,text="Login to GradeSpeed").pack()
+Label(logGUI,text="").pack()
+userSign = Label(logGUI,text="Username:").pack()
+userHold = StringVar()
+userField = Entry(logGUI,textvariable=userHold).pack()
+Label(logGUI,text="").pack()
+passSign = Label(logGUI,text="Password:").pack()
+passHold = StringVar()
+passField = Entry(logGUI,textvariable=passHold, show = "*").pack()
+Label(logGUI,text="").pack()
+okBut = Button(text="Login",command=getLogin).pack()
+logGUI.mainloop()
+
