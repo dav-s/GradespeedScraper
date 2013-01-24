@@ -76,6 +76,10 @@ def netStuff(userNm, passWd):
 
         getTableDat = BeautifulSoup(woU8)
         getTableDat.prettify()
+        fRow=getTableDat.findAll("tr")
+        tempCols = BeautifulSoup(str(fRow[0]))
+        Cols = tempCols.findAll("th")
+        numOCols= len(Cols)-1
         indexList = getTableDat.findAll("td")
         
         extracted = []
@@ -85,11 +89,11 @@ def netStuff(userNm, passWd):
        
         matric = []
     
-        for i in range(len(extracted)/12):
+        for i in range(len(extracted)/numOCols):
             holder = []
-            for j in range(12):
+            for j in range(numOCols):
                 try:
-                    holder.append(extracted[i*12+j])
+                    holder.append(extracted[i*numOCols+j])
                 except Exception:
                     holder.append([])
             matric.append(holder)
