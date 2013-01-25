@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from Tkinter import *
-import mechanize, re, sys
+import mechanize, re
 
 def decodeString(inpt):
     keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
@@ -98,50 +98,55 @@ def cycleStuff(userNm, passWd):
     userCtrl.value = userNm
     passwrdCtrl.value = passWd
 
+    Continue = True
+
     response = br.submit()
     try:
         br.select_form("aspnetForm")
     except Exception:
         print "Incorrect Password."
-        sys.exit()
-    
-    oneStudent=False
-    
-    try:
-        studC = br.form.find_control(nr=10)
-    except Exception:
-        oneStudent = True
+        Continue = False
+        
+    if(Continue):
+        oneStudent=False
+        
+        try:
+            studC = br.form.find_control(nr=10)
+        except Exception:
+            oneStudent = True
 
-    if oneStudent:
-        tableGet(["NONE"], oneStudent, br)
+        if oneStudent:
+            tableGet(["BLARRRGHHH!"], oneStudent, br)
+        else:
+            for options in studC.items:
+                tableGet(options, oneStudent, br)
+
     else:
-        for options in studC.items:
-            tableGet(options, oneStudent, br)
+        logGUIMeth()
         
 
+def logGUIMeth():
+    def getLogin():
+        uTemp=userHold.get()
+        pTemp=passHold.get()
+        logGUI.destroy()
+        cycleStuff(uTemp,pTemp)
+        return
+    logGUI = Tk()
+    logGUI.geometry("200x200+250+250")
+    logGUI.title("Login Window")
+    Label(logGUI,text="").pack()
+    logSign = Label(logGUI,text="Login to GradeSpeed").pack()
+    Label(logGUI,text="").pack()
+    userSign = Label(logGUI,text="Username:").pack()
+    userHold = StringVar()
+    userField = Entry(logGUI,textvariable=userHold).pack()
+    Label(logGUI,text="").pack()
+    passSign = Label(logGUI,text="Password:").pack()
+    passHold = StringVar()
+    passField = Entry(logGUI,textvariable=passHold, show = "*").pack()
+    Label(logGUI,text="").pack()
+    okBut = Button(text="Login",command=getLogin).pack()
+    logGUI.mainloop()
 
-
-def getLogin():
-    uTemp=userHold.get()
-    pTemp=passHold.get()
-    logGUI.destroy()
-    cycleStuff(uTemp,pTemp)
-    return
-
-logGUI = Tk()
-logGUI.geometry("200x200+250+250")
-logGUI.title("Login Window")
-Label(logGUI,text="").pack()
-logSign = Label(logGUI,text="Login to GradeSpeed").pack()
-Label(logGUI,text="").pack()
-userSign = Label(logGUI,text="Username:").pack()
-userHold = StringVar()
-userField = Entry(logGUI,textvariable=userHold).pack()
-Label(logGUI,text="").pack()
-passSign = Label(logGUI,text="Password:").pack()
-passHold = StringVar()
-passField = Entry(logGUI,textvariable=passHold, show = "*").pack()
-Label(logGUI,text="").pack()
-okBut = Button(text="Login",command=getLogin).pack()
-logGUI.mainloop()
-
+logGUIMeth()
