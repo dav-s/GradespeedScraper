@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from Tkinter import *
-import mechanize, re
+import mechanize, re, sys
 
 def decodeString(inpt):
     keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
@@ -29,7 +29,59 @@ def decodeString(inpt):
             output = output + chr(chr3)
     return output
 
-def netStuff(userNm, passWd):
+def tableGet(options, oneStudent, br):
+    if oneStudent!=True:
+        print options.name
+        print
+        br.select_form("aspnetForm")
+        studCaux = br.form.find_control(nr=10)
+        studCaux.value = [options.name]
+        br.submit()
+    
+    oGrade = br.follow_link(text_regex="Grades")
+    oPage = oGrade.read()
+    if oneStudent:
+        narrowed = oPage.split("var")[2].split("document.write")[0].split("'")
+    else:
+        narrowed = oPage.split("var")[3].split("document.write")[0].split("'")
+    code=""
+    for i in range(3,len(narrowed)):
+        if i%2==1:
+            code=code+narrowed[i]
+    
+    rawhtml = decodeString(code)
+    woU8 = rawhtml.replace("&nbsp;","")
+
+    getTableDat = BeautifulSoup(woU8)
+    getTableDat.prettify()
+    fRow=getTableDat.findAll("tr")
+    tempCols = BeautifulSoup(str(fRow[0]))
+    Cols = tempCols.findAll("th")
+    numOCols= len(Cols)-1
+    indexList = getTableDat.findAll("td")
+    
+    extracted = []
+    
+    for rows in indexList:
+        extracted.append(rows.contents)
+
+    matric = []
+    
+    for i in range(len(extracted)/numOCols):
+        holder = []
+        for j in range(numOCols):
+            try:
+                holder.append(extracted[i*numOCols+j])
+            except Exception:
+                holder.append([])
+        matric.append(holder)
+        
+    for rows in matric:
+        for columns in rows:
+            print columns
+        print
+
+def cycleStuff(userNm, passWd):
     cj = mechanize.CookieJar()
     br = mechanize.Browser()
     br.set_cookiejar(cj)
@@ -47,61 +99,25 @@ def netStuff(userNm, passWd):
     passwrdCtrl.value = passWd
 
     response = br.submit()
-    
-    
-    br.select_form("aspnetForm")
-
-    studC = br.form.find_control(nr=10)
-
-    for options in studC.items:
-        
-        print options.name
-        print
-    
+    try:
         br.select_form("aspnetForm")
-        studCaux = br.form.find_control(nr=10)
-        studCaux.value = [options.name]
-        br.submit()
-        
-        oGrade = br.follow_link(text_regex="Grades")
-        oPage = oGrade.read()
-        narrowed = oPage.split("var")[3].split("document.write")[0].split("'")
-        code=""
-        for i in range(3,len(narrowed)):
-            if i%2==1:
-                code=code+narrowed[i]
-        
-        rawhtml = decodeString(code)
-        woU8 = rawhtml.replace("&nbsp;","")
+    except Exception:
+        print "Incorrect Password."
+        sys.exit()
+    
+    oneStudent=False
+    
+    try:
+        studC = br.form.find_control(nr=10)
+    except Exception:
+        oneStudent = True
 
-        getTableDat = BeautifulSoup(woU8)
-        getTableDat.prettify()
-        fRow=getTableDat.findAll("tr")
-        tempCols = BeautifulSoup(str(fRow[0]))
-        Cols = tempCols.findAll("th")
-        numOCols= len(Cols)-1
-        indexList = getTableDat.findAll("td")
+    if oneStudent:
+        tableGet(["NONE"], oneStudent, br)
+    else:
+        for options in studC.items:
+            tableGet(options, oneStudent, br)
         
-        extracted = []
-    
-        for rows in indexList:
-            extracted.append(rows.contents)
-       
-        matric = []
-    
-        for i in range(len(extracted)/numOCols):
-            holder = []
-            for j in range(numOCols):
-                try:
-                    holder.append(extracted[i*numOCols+j])
-                except Exception:
-                    holder.append([])
-            matric.append(holder)
-        
-        for rows in matric:
-            for columns in rows:
-                print columns
-            print
 
 
 
@@ -109,7 +125,7 @@ def getLogin():
     uTemp=userHold.get()
     pTemp=passHold.get()
     logGUI.destroy()
-    netStuff(uTemp,pTemp)
+    cycleStuff(uTemp,pTemp)
     return
 
 logGUI = Tk()
