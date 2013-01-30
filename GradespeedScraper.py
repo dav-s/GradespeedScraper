@@ -77,8 +77,13 @@ def tableGet(options, oneStudent, br):
         matric.append(holder)
         
     for rows in matric:
+        holda = 1
         for columns in rows:
-            print columns
+            try:
+                print Cols[holda].contents[0], ":" ,columns[0]
+            except Exception:
+                print Cols[holda].contents[0], ": Nothing." 
+            holda=holda+1
         print
 
 def cycleStuff(userNm, passWd):
@@ -87,43 +92,48 @@ def cycleStuff(userNm, passWd):
     br.set_cookiejar(cj)
     br.set_handle_robots(False)
     br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0')]
-    
-    br.open("https://gradespeed.kleinisd.net/pc/Default.aspx")
-    
-    br.select_form("Form1")
-    
-    userCtrl = br.form.find_control("txtUserName")
-    passwrdCtrl = br.form.find_control("txtPassword")
-    
-    userCtrl.value = userNm
-    passwrdCtrl.value = passWd
 
     Continue = True
-
-    response = br.submit()
+    
     try:
-        br.select_form("aspnetForm")
+        br.open("https://gradespeed.kleinisd.net/pc/Default.aspx")
     except Exception:
-        print "Incorrect Password."
+        print "Please check if you are connected to the internet."
         Continue = False
         
-    if(Continue):
-        oneStudent=False
+    if Continue:
+        br.select_form("Form1")
         
+        userCtrl = br.form.find_control("txtUserName")
+        passwrdCtrl = br.form.find_control("txtPassword")
+        
+        userCtrl.value = userNm
+        passwrdCtrl.value = passWd
+
+        response = br.submit()
         try:
-            studC = br.form.find_control(nr=10)
+            br.select_form("aspnetForm")
         except Exception:
-            oneStudent = True
+            print "Incorrect Password."
+            Continue = False
+            
+        if(Continue):
+            oneStudent=False
+            
+            try:
+                studC = br.form.find_control(nr=10)
+            except Exception:
+                oneStudent = True
 
-        if oneStudent:
-            tableGet(["BLARRRGHHH!"], oneStudent, br)
+            if oneStudent:
+                tableGet(["BLARRRGHHH!"], oneStudent, br)
+            else:
+                for options in studC.items:
+                    tableGet(options, oneStudent, br)
         else:
-            for options in studC.items:
-                tableGet(options, oneStudent, br)
-
+            logGUIMeth()
     else:
-        logGUIMeth()
-        
+        logGUIMeth()    
 
 def logGUIMeth():
     def getLogin():
@@ -149,4 +159,8 @@ def logGUIMeth():
     okBut = Button(text="Login",command=getLogin).pack()
     logGUI.mainloop()
 
-logGUIMeth()
+def main():
+    logGUIMeth()
+
+if __name__ == "__main__":
+    main()
