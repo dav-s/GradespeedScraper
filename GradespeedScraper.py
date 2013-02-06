@@ -2,6 +2,9 @@ from bs4 import BeautifulSoup
 from Tkinter import *
 import mechanize, re
 
+cj = mechanize.CookieJar()
+br = mechanize.Browser()
+
 def decodeString(inpt):
     keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
     output = ""
@@ -29,9 +32,38 @@ def decodeString(inpt):
             output = output + chr(chr3)
     return output
 
-def tableGet(options, oneStudent, br):
+def inDepthDL(ending):
+    link = "https://gradespeed.kleinisd.net/pc/ParentStudentGrades.aspx"+ending
+    try:
+        br.open(link)
+    except Exception:
+        print "Sorry. There was an error."
+    
+    return 1
+
+def GUIprintSel(Titles, Matrix, Child):
+    GUISel = Tk()
+    GUISel.title(Child)
+    for rows in Matrix:
+        holda = 1
+        for columns in rows:
+            try:
+                try:
+                    temp = "%s" % str(Titles[holda].contents[0]).ljust(7) + " : " + str(columns[0]).split(">")[1].split("<")[0]
+                except Exception:
+                    temp = "%s" % str(Titles[holda].contents[0]).ljust(7) + " : " + columns[0]
+            except Exception:
+                temp = "%s" % str(Titles[holda].contents[0]).ljust(7) + " : "
+            holda=holda+1
+            Label(GUISel,text=temp).pack()
+        Label(GUISel,text="").pack()
+    GUISel.mainloop()
+
+def tableGet(options, oneStudent, iterator, namHold):
     if oneStudent!=True:
-        print options.name
+        name = str(namHold)
+        name=name.split("label='")[iterator+1].split("'")[0]
+        print name
         print
         br.select_form("aspnetForm")
         studCaux = br.form.find_control(nr=10)
@@ -80,19 +112,21 @@ def tableGet(options, oneStudent, br):
         holda = 1
         for columns in rows:
             try:
-                print Cols[holda].contents[0], ":" ,columns[0]
+                try:
+                    temp = "%s" % str(Cols[holda].contents[0]).ljust(7) + " : " + str(columns[0]).split(">")[1].split("<")[0]
+                    print temp
+                except Exception:
+                    temp = "%s" % str(Cols[holda].contents[0]).ljust(7) + " : " + columns[0]
+                    print temp
             except Exception:
-                print Cols[holda].contents[0], ": Nothing." 
+                temp = "%s" % str(Cols[holda].contents[0]).ljust(7) + " : "
+                print temp 
             holda=holda+1
         print
+    #GUIprintSel(Cols, matric, name)
 
 def cycleStuff(userNm, passWd):
-    cj = mechanize.CookieJar()
-    br = mechanize.Browser()
-    br.set_cookiejar(cj)
-    br.set_handle_robots(False)
-    br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0')]
-
+    
     Continue = True
     
     try:
@@ -114,7 +148,7 @@ def cycleStuff(userNm, passWd):
         try:
             br.select_form("aspnetForm")
         except Exception:
-            print "Incorrect Password."
+            print "Incorrect Username and/or Password."
             Continue = False
             
         if(Continue):
@@ -126,10 +160,12 @@ def cycleStuff(userNm, passWd):
                 oneStudent = True
 
             if oneStudent:
-                tableGet(["BLARRRGHHH!"], oneStudent, br)
+                tableGet(["BLARRRGHHH!"], oneStudent, 0, ["Trolol"])
             else:
+                it=0
                 for options in studC.items:
-                    tableGet(options, oneStudent, br)
+                    tableGet(options, oneStudent, it, studC.items)
+                    it=it+1
         else:
             logGUIMeth()
     else:
@@ -160,7 +196,11 @@ def logGUIMeth():
     logGUI.mainloop()
 
 def main():
+    br.set_cookiejar(cj)
+    br.set_handle_robots(False)
+    br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0')]
     logGUIMeth()
 
 if __name__ == "__main__":
+    
     main()
