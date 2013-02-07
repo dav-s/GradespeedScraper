@@ -27,7 +27,7 @@ def decodeString(inpt):
         
         if enc3 != 64:
             output = output + chr(chr2)
-			
+
         if enc4 != 64:
             output = output + chr(chr3)
     return output
@@ -45,17 +45,22 @@ def GUIprintSel(Titles, Matrix, Child):
     GUISel = Tk()
     GUISel.title(Child)
     for rows in Matrix:
+        res="";
         holda = 1
         for columns in rows:
+            temp=""
             try:
                 try:
-                    temp = "%s" % str(Titles[holda].contents[0]).ljust(7) + " : " + str(columns[0]).split(">")[1].split("<")[0]
+                    temp = str(columns[0]).split(">")[1].split("<")[0]
                 except Exception:
-                    temp = "%s" % str(Titles[holda].contents[0]).ljust(7) + " : " + columns[0]
-            except Exception:
-                temp = "%s" % str(Titles[holda].contents[0]).ljust(7) + " : "
+                    temp = str(columns[0])
+            except: temp = "-"
+            if holda != 1:
+                res=res+"%s " % temp.rjust(5)
+            else:
+                res=res+"%s " % temp.ljust(25)+":"
             holda=holda+1
-            Label(GUISel,text=temp).pack()
+        Label(GUISel,text=res).pack()
         Label(GUISel,text="").pack()
     GUISel.mainloop()
 
@@ -123,7 +128,7 @@ def tableGet(options, oneStudent, iterator, namHold):
                 print temp 
             holda=holda+1
         print
-    #GUIprintSel(Cols, matric, name)
+    GUIprintSel(Cols, matric, name)
 
 def cycleStuff(userNm, passWd):
     
