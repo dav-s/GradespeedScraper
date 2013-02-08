@@ -44,24 +44,26 @@ def inDepthDL(ending):
 def GUIprintSel(Titles, Matrix, Child):
     GUISel = Tk()
     GUISel.title(Child)
-    for rows in Matrix:
+    for headers in range(1,len(Titles)):
+        Label(GUISel, text=Titles[headers].contents[0]).grid(row=0, column=headers-1)
+    for rows in range(len(Matrix)):
         res="";
         holda = 1
-        for columns in rows:
+        for columns in range(len(Matrix[rows])):
             temp=""
+            isLink = False
             try:
                 try:
-                    temp = str(columns[0]).split(">")[1].split("<")[0]
+                    temp = str(Matrix[rows][columns]).split(">")[1].split("<")[0]
+                    isLink=True
                 except Exception:
-                    temp = str(columns[0])
+                    temp = str(Matrix[rows][columns][0])
             except: temp = "-"
-            if holda != 1:
-                res=res+"%s " % temp.rjust(5)
-            else:
-                res=res+"%s " % temp.ljust(25)+":"
             holda=holda+1
-        Label(GUISel,text=res).pack()
-        Label(GUISel,text="").pack()
+            if isLink:
+                Label(GUISel,text=temp).grid(row=rows+1, column=columns)
+            else:
+                Label(GUISel,text=temp).grid(row=rows+1, column=columns)
     GUISel.mainloop()
 
 def tableGet(options, oneStudent, iterator, namHold):
@@ -128,7 +130,11 @@ def tableGet(options, oneStudent, iterator, namHold):
                 print temp 
             holda=holda+1
         print
-    GUIprintSel(Cols, matric, name)
+
+    if oneStudent!=True:
+        GUIprintSel(Cols, matric, name)
+    else:
+        GUIprintSel(Cols, matric, "GradespeedScraper")
 
 def cycleStuff(userNm, passWd):
     
