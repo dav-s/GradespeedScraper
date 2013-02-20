@@ -41,7 +41,7 @@ def inDepthDL(ending):
     
     return 1
 
-def GUIprintSel(Titles, Matrix, Child):
+def GUIprintSel(Titles, Matrix, Child, oneStudent):
     GUISel = Tk()
     GUISel.title(Child)
     for headers in range(1,len(Titles)):
@@ -64,6 +64,8 @@ def GUIprintSel(Titles, Matrix, Child):
                 Label(GUISel,text=temp).grid(row=rows+1, column=columns)
             else:
                 Label(GUISel,text=temp).grid(row=rows+1, column=columns)
+    if oneStudent==False:
+        Button(GUISel,text="Select Student").grid(row=len(Matrix)+1,column=0,columnspan=len(Matrix[1]))
     GUISel.mainloop()
 
 def tableGet(options, oneStudent, iterator, namHold):
@@ -71,10 +73,10 @@ def tableGet(options, oneStudent, iterator, namHold):
         name = str(namHold)
         name=name.split("label='")[iterator+1].split("'")[0]
         print name
-        print
         br.select_form("aspnetForm")
         studCaux = br.form.find_control(nr=10)
         studCaux.value = [options.name]
+        print "Loading..."
         br.submit()
     
     oGrade = br.follow_link(text_regex="Grades")
@@ -114,27 +116,14 @@ def tableGet(options, oneStudent, iterator, namHold):
             except Exception:
                 holder.append([])
         matric.append(holder)
-        
-    for rows in matric:
-        holda = 1
-        for columns in rows:
-            try:
-                try:
-                    temp = "%s" % str(Cols[holda].contents[0]).ljust(7) + " : " + str(columns[0]).split(">")[1].split("<")[0]
-                    print temp
-                except Exception:
-                    temp = "%s" % str(Cols[holda].contents[0]).ljust(7) + " : " + columns[0]
-                    print temp
-            except Exception:
-                temp = "%s" % str(Cols[holda].contents[0]).ljust(7) + " : "
-                print temp 
-            holda=holda+1
-        print
+
+    print "Done! Press exit to go to the next student."
+    print
 
     if oneStudent!=True:
-        GUIprintSel(Cols, matric, name)
+        GUIprintSel(Cols, matric, name, oneStudent)
     else:
-        GUIprintSel(Cols, matric, "GradespeedScraper")
+        GUIprintSel(Cols, matric, "1st", oneStudent)
 
 def cycleStuff(userNm, passWd):
     
@@ -189,6 +178,9 @@ def logGUIMeth():
         logGUI.destroy()
         cycleStuff(uTemp,pTemp)
         return
+    def entLog(evt):
+        getLogin();
+        return
     logGUI = Tk()
     logGUI.geometry("200x200+250+250")
     logGUI.title("Login Window")
@@ -197,11 +189,15 @@ def logGUIMeth():
     Label(logGUI,text="").pack()
     userSign = Label(logGUI,text="Username:").pack()
     userHold = StringVar()
-    userField = Entry(logGUI,textvariable=userHold).pack()
+    userField = Entry(logGUI,textvariable=userHold)
+    userField.pack()
+    userField.bind("<Key-Return>", entLog)
     Label(logGUI,text="").pack()
     passSign = Label(logGUI,text="Password:").pack()
     passHold = StringVar()
-    passField = Entry(logGUI,textvariable=passHold, show = "*").pack()
+    passField = Entry(logGUI,textvariable=passHold, show = "*")
+    passField.pack()
+    passField.bind("<Key-Return>", entLog)
     Label(logGUI,text="").pack()
     okBut = Button(text="Login",command=getLogin).pack()
     logGUI.mainloop()
@@ -213,5 +209,4 @@ def main():
     logGUIMeth()
 
 if __name__ == "__main__":
-    
     main()
