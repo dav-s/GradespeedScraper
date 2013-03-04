@@ -32,6 +32,29 @@ def decodeString(inpt):
             output = output + chr(chr3)
     return output
 
+def studentSel(studys):
+    name = str(studys)
+    fname = name.split("label='")[1].split("'")[0]
+    names=[fname]
+    for i in range(1,len(studys)):
+        names.append(name.split("label='")[i+1].split("'")[0])
+    def buttPress():
+        inde=0
+        daTemp = var.get()
+        for i in range(1,len(names)):
+            if str(daTemp) in str(names[i]):
+                inde = i
+        studSel.destroy()
+        tableGet(studys[inde], False, inde, studys)
+    studSel = Tk()
+    var = StringVar()
+    var.set(fname)
+    Label(text="Select a student:").grid(row=0, column=0, columnspan=2)
+    OptionMenu(studSel, var, *names).grid(row=1, column=0, columnspan=2)
+    Button(text="Continue", command=buttPress).grid(row=2, column=0, columnspan=2)
+    studSel.mainloop()
+    
+
 def inDepthDL(ending):
     link = "https://gradespeed.kleinisd.net/pc/ParentStudentGrades.aspx"+ending
     try:
@@ -41,7 +64,10 @@ def inDepthDL(ending):
     
     return 1
 
-def GUIprintSel(Titles, Matrix, Child, oneStudent):
+def GUIprintSel(Titles, Matrix, Child, oneStudent, holdy):
+    def studSelBut():
+        GUISel.destroy()
+        studentSel(holdy)
     GUISel = Tk()
     GUISel.title(Child)
     for headers in range(1,len(Titles)):
@@ -65,7 +91,7 @@ def GUIprintSel(Titles, Matrix, Child, oneStudent):
             else:
                 Label(GUISel,text=temp).grid(row=rows+1, column=columns)
     if oneStudent==False:
-        Button(GUISel,text="Select Student").grid(row=len(Matrix)+1,column=0,columnspan=len(Matrix[1]))
+        Button(GUISel,text="Select Student", command=studSelBut).grid(row=len(Matrix)+1,column=0,columnspan=len(Matrix[1]))
     GUISel.mainloop()
 
 def tableGet(options, oneStudent, iterator, namHold):
@@ -117,13 +143,13 @@ def tableGet(options, oneStudent, iterator, namHold):
                 holder.append([])
         matric.append(holder)
 
-    print "Done! Press exit to go to the next student."
+    print "Done!"
     print
 
     if oneStudent!=True:
-        GUIprintSel(Cols, matric, name, oneStudent)
+        GUIprintSel(Cols, matric, name, oneStudent, namHold)
     else:
-        GUIprintSel(Cols, matric, "1st", oneStudent)
+        GUIprintSel(Cols, matric, "1st", oneStudent, namHold)
 
 def cycleStuff(userNm, passWd):
     
@@ -162,10 +188,7 @@ def cycleStuff(userNm, passWd):
             if oneStudent:
                 tableGet(["BLARRRGHHH!"], oneStudent, 0, ["Trolol"])
             else:
-                it=0
-                for options in studC.items:
-                    tableGet(options, oneStudent, it, studC.items)
-                    it=it+1
+                studentSel(studC.items)
         else:
             logGUIMeth()
     else:
