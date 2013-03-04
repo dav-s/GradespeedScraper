@@ -5,6 +5,13 @@ import mechanize, re
 cj = mechanize.CookieJar()
 br = mechanize.Browser()
 
+def centerDat(gui):
+    gui.update_idletasks()
+    xPos = (gui.winfo_screenwidth()/2) - (gui.winfo_width()/2)
+    yPos = (gui.winfo_screenheight()/2) - (gui.winfo_height()/2)
+    gui.geometry("+%d+%d" % (xPos, yPos))
+
+
 def decodeString(inpt):
     keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
     output = ""
@@ -47,11 +54,13 @@ def studentSel(studys):
         studSel.destroy()
         tableGet(studys[inde], False, inde, studys)
     studSel = Tk()
+    centerDat(studSel)
+    studSel.title("Student Selection")
     var = StringVar()
     var.set(fname)
-    Label(text="Select a student:").grid(row=0, column=0, columnspan=2)
-    OptionMenu(studSel, var, *names).grid(row=1, column=0, columnspan=2)
-    Button(text="Continue", command=buttPress).grid(row=2, column=0, columnspan=2)
+    Label(text="Select a student:").pack(padx=50, pady=(10,5))
+    OptionMenu(studSel, var, *names).pack(padx=50, pady=10)
+    Button(text="Continue", command=buttPress).pack(padx=50, pady=(5,10))
     studSel.mainloop()
     
 
@@ -70,8 +79,10 @@ def GUIprintSel(Titles, Matrix, Child, oneStudent, holdy):
         studentSel(holdy)
     GUISel = Tk()
     GUISel.title(Child)
+    daFr = Frame(GUISel)
+    daFr.pack(expand = 1, pady = 8, padx = 8)
     for headers in range(1,len(Titles)):
-        Label(GUISel, text=Titles[headers].contents[0]).grid(row=0, column=headers-1)
+        Label(daFr, text=Titles[headers].contents[0]).grid(row=0, column=headers-1)
     for rows in range(len(Matrix)):
         res="";
         holda = 1
@@ -87,11 +98,12 @@ def GUIprintSel(Titles, Matrix, Child, oneStudent, holdy):
             except: temp = "-"
             holda=holda+1
             if isLink:
-                Label(GUISel,text=temp).grid(row=rows+1, column=columns)
+                Label(daFr,text=temp).grid(row=rows+1, column=columns)
             else:
-                Label(GUISel,text=temp).grid(row=rows+1, column=columns)
+                Label(daFr,text=temp).grid(row=rows+1, column=columns)
     if oneStudent==False:
-        Button(GUISel,text="Select Student", command=studSelBut).grid(row=len(Matrix)+1,column=0,columnspan=len(Matrix[1]))
+        Button(GUISel,text="Select Student", command=studSelBut).pack(pady=10)
+    centerDat(GUISel)
     GUISel.mainloop()
 
 def tableGet(options, oneStudent, iterator, namHold):
@@ -205,24 +217,20 @@ def logGUIMeth():
         getLogin();
         return
     logGUI = Tk()
-    logGUI.geometry("200x200+250+250")
     logGUI.title("Login Window")
-    Label(logGUI,text="").pack()
-    logSign = Label(logGUI,text="Login to GradeSpeed").pack()
-    Label(logGUI,text="").pack()
-    userSign = Label(logGUI,text="Username:").pack()
+    logSign = Label(logGUI,text="Login to GradeSpeed").pack(padx=50,pady=(10,5))
+    userSign = Label(logGUI,text="Username:").pack(padx=50, pady=(5,0))
     userHold = StringVar()
     userField = Entry(logGUI,textvariable=userHold)
-    userField.pack()
+    userField.pack(padx=50, pady=(0,5))
     userField.bind("<Key-Return>", entLog)
-    Label(logGUI,text="").pack()
-    passSign = Label(logGUI,text="Password:").pack()
+    passSign = Label(logGUI,text="Password:").pack(padx=50, pady=(5,0))
     passHold = StringVar()
     passField = Entry(logGUI,textvariable=passHold, show = "*")
-    passField.pack()
+    passField.pack(padx=50, pady=(0,5))
     passField.bind("<Key-Return>", entLog)
-    Label(logGUI,text="").pack()
-    okBut = Button(text="Login",command=getLogin).pack()
+    okBut = Button(text="Login",command=getLogin).pack(padx=50, pady=(5,10))
+    centerDat(logGUI)
     logGUI.mainloop()
 
 def main():
