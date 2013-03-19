@@ -1,9 +1,11 @@
 from bs4 import BeautifulSoup
 from Tkinter import *
-import mechanize, re
+import mechanize, platform
 
 cj = mechanize.CookieJar()
 br = mechanize.Browser()
+isWindows = False
+oneStudent = False
 
 def centerDat(gui):
     gui.update_idletasks()
@@ -11,6 +13,13 @@ def centerDat(gui):
     yPos = (gui.winfo_screenheight()/2) - (gui.winfo_height()/2)
     gui.geometry("+%d+%d" % (xPos, yPos))
 
+def printMess(texty):
+    popup = Tk()
+    popup.title("Message")
+    Label(popup, text = texty).pack(padx=10,pady=10)
+    centerDat(popup)
+    if(isWindows):
+        popup.mainloop()
 
 def decodeString(inpt):
     keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
@@ -52,7 +61,7 @@ def studentSel(studys):
             if str(daTemp) in str(names[i]):
                 inde = i
         studSel.destroy()
-        tableGet(studys[inde], False, inde, studys)
+        tableGet(studys[inde], inde, studys)
     studSel = Tk()
     centerDat(studSel)
     studSel.title("Student Selection")
@@ -61,77 +70,44 @@ def studentSel(studys):
     Label(text="Select a student:").pack(padx=50, pady=(10,5))
     OptionMenu(studSel, var, *names).pack(padx=50, pady=10)
     Button(text="Continue", command=buttPress).pack(padx=50, pady=(5,10))
-    studSel.mainloop()
+    if(isWindows):
+        studSel.mainloop()
     
 
 def inDepthDL(ending):
     link = "https://gradespeed.kleinisd.net/pc/ParentStudentGrades.aspx"+ending
     try:
-        br.open(link)
+        resp = br.open(link)
     except Exception:
-        print "Sorry. There was an error."
-    
-    return 1
+        printMess("Sorry. There was an error.")
 
-def GUIprintSel(Titles, Matrix, Child, oneStudent, holdy):
-    def studSelBut():
-        GUISel.destroy()
-        studentSel(holdy)
-    GUISel = Tk()
-    GUISel.title(Child)
-    daFr = Frame(GUISel)
-    daFr.pack(expand = 1, pady = 8, padx = 8)
-    for headers in range(1,len(Titles)):
-        Label(daFr, text=Titles[headers].contents[0]).grid(row=0, column=headers-1)
-    for rows in range(len(Matrix)):
-        res="";
-        holda = 1
-        for columns in range(len(Matrix[rows])):
-            temp=""
-            isLink = False
-            try:
-                try:
-                    temp = str(Matrix[rows][columns]).split(">")[1].split("<")[0]
-                    isLink=True
-                except Exception:
-                    temp = str(Matrix[rows][columns][0])
-            except: temp = "-"
-            holda=holda+1
-            if isLink:
-                Label(daFr,text=temp).grid(row=rows+1, column=columns)
-            else:
-                Label(daFr,text=temp).grid(row=rows+1, column=columns)
-    if oneStudent==False:
-        Button(GUISel,text="Select Student", command=studSelBut).pack(pady=10)
-    centerDat(GUISel)
-    GUISel.mainloop()
+    hueHue = str(resp.read())
 
-def tableGet(options, oneStudent, iterator, namHold):
-    if oneStudent!=True:
-        name = str(namHold)
-        name=name.split("label='")[iterator+1].split("'")[0]
-        print name
-        br.select_form("aspnetForm")
-        studCaux = br.form.find_control(nr=10)
-        studCaux.value = [options.name]
-        print "Loading..."
-        br.submit()
+    print hueHue
     
-    oGrade = br.follow_link(text_regex="Grades")
-    oPage = oGrade.read()
+    specificWOver = Tk()
+    getOverViewFrame(specificWOver, hueHue).pack()
     if oneStudent:
-        narrowed = oPage.split("var")[2].split("document.write")[0].split("'")
+        newStuff = extractInfo(3, hueHue)
     else:
-        narrowed = oPage.split("var")[3].split("document.write")[0].split("'")
-    code=""
-    for i in range(3,len(narrowed)):
-        if i%2==1:
-            code=code+narrowed[i]
-    
-    rawhtml = decodeString(code)
-    woU8 = rawhtml.replace("&nbsp;","")
+        newStuff = extractInfo(4, hueHue)
+    print newStuff
+    centerDat(specificWOver)
+    if(isWindows):
+        specificWOver.mainloop()
 
-    getTableDat = BeautifulSoup(woU8)
+def getOverViewFrame(GUI, unProcPage):
+
+    def inDepthSetup(str):
+        GUI.destroy()
+        inDepthDL(str)
+
+    if oneStudent:
+        done = extractInfo(2, str(unProcPage))
+    else:
+        done = extractInfo(3, str(unProcPage))
+
+    getTableDat = BeautifulSoup(done)
     getTableDat.prettify()
     fRow=getTableDat.findAll("tr")
     tempCols = BeautifulSoup(str(fRow[0]))
@@ -154,23 +130,83 @@ def tableGet(options, oneStudent, iterator, namHold):
             except Exception:
                 holder.append([])
         matric.append(holder)
+    
+    daFr = Frame(GUI)
+    for headers in range(1,len(Cols)):
+        Label(daFr, text=Cols[headers].contents[0]).grid(row=0, column=headers-1)
+    for rows in range(len(matric)):
+        holda = 1
+        for columns in range(len(matric[rows])):
+            temp=""
+            isLink = False
+            try:
+                try:
+                    temp = str(matric[rows][columns]).split(">")[1].split("<")[0]
+                    if 'href="' in str(matric[rows][columns]):
+                        isLink=True
+                except Exception:
+                    temp = str(matric[rows][columns][0])
+            except: temp = "-"
+            holda=holda+1
+            if isLink:
+                temper = str(matric[rows][columns]).split('href="')[1].split('"')[0]
+                Button(daFr,text=temp, command=lambda temper = temper:inDepthSetup(temper)).grid(row=rows+1, column=columns)
+            else:
+                Label(daFr,text=temp).grid(row=rows+1, column=columns)
+    return daFr
 
-    print "Done!"
-    print
+def GUIprintSel(page, Child, holdy):
+    def studSelBut():
+        GUISel.destroy()
+        studentSel(holdy)
+
+    GUISel = Tk()
+    GUISel.title(Child)
+    ovs = getOverViewFrame(GUISel, page)
+    ovs.pack(expand = 1, pady = 8, padx = 8)
+    if oneStudent==False:
+        Button(GUISel,text="Select Student", command=studSelBut).pack(pady=10)
+    centerDat(GUISel)
+    if(isWindows):
+        GUISel.mainloop()
+
+def extractInfo(index, unProcessed):
+    narrowed = unProcessed.split("var")[index].split("document.write")[0].split("'")
+    code=""
+    for i in range(3,len(narrowed)):
+        if i%2==1:
+            code=code+narrowed[i]
+    
+    rawhtml = decodeString(code)
+    woU8 = rawhtml.replace("&nbsp;","")
+    return woU8;
+
+def tableGet(options, iterator, namHold):
+    global br
+    if oneStudent!=True:
+        name = str(namHold)
+        name=name.split("label='")[iterator+1].split("'")[0]
+        br.select_form("aspnetForm")
+        studCaux = br.form.find_control(nr=10)
+        studCaux.value = [options.name]
+        br.submit()
+    
+    oGrade = br.follow_link(text_regex="Grades")
+    oPage = oGrade.read()
 
     if oneStudent!=True:
-        GUIprintSel(Cols, matric, name, oneStudent, namHold)
+        GUIprintSel(oPage, name, namHold)
     else:
-        GUIprintSel(Cols, matric, "1st", oneStudent, namHold)
+        GUIprintSel(oPage, "1st", namHold)
 
 def cycleStuff(userNm, passWd):
-    
+    global oneStudent    
     Continue = True
     
     try:
         br.open("https://gradespeed.kleinisd.net/pc/Default.aspx")
     except Exception:
-        print "Please check if you are connected to the internet."
+        printMess("Please check if you are connected to the internet.")
         Continue = False
         
     if Continue:
@@ -182,23 +218,22 @@ def cycleStuff(userNm, passWd):
         userCtrl.value = userNm
         passwrdCtrl.value = passWd
 
-        response = br.submit()
+        br.submit()
+        
         try:
             br.select_form("aspnetForm")
         except Exception:
-            print "Incorrect Username and/or Password."
+            printMess("Incorrect Username and/or Password.")
             Continue = False
             
-        if(Continue):
-            oneStudent=False
-            
+        if(Continue):            
             try:
                 studC = br.form.find_control(nr=10)
             except Exception:
                 oneStudent = True
 
             if oneStudent:
-                tableGet(["BLARRRGHHH!"], oneStudent, 0, ["Trolol"])
+                tableGet(["BLARRRGHHH!"], 0, ["Trolol"])
             else:
                 studentSel(studC.items)
         else:
@@ -218,22 +253,26 @@ def logGUIMeth():
         return
     logGUI = Tk()
     logGUI.title("Login Window")
-    logSign = Label(logGUI,text="Login to GradeSpeed").pack(padx=50,pady=(10,5))
-    userSign = Label(logGUI,text="Username:").pack(padx=50, pady=(5,0))
+    Label(logGUI,text="Login to GradeSpeed").pack(padx=50,pady=(10,5))
+    Label(logGUI,text="Username:").pack(padx=50, pady=(5,0))
     userHold = StringVar()
     userField = Entry(logGUI,textvariable=userHold)
     userField.pack(padx=50, pady=(0,5))
     userField.bind("<Key-Return>", entLog)
-    passSign = Label(logGUI,text="Password:").pack(padx=50, pady=(5,0))
+    Label(logGUI,text="Password:").pack(padx=50, pady=(5,0))
     passHold = StringVar()
     passField = Entry(logGUI,textvariable=passHold, show = "*")
     passField.pack(padx=50, pady=(0,5))
     passField.bind("<Key-Return>", entLog)
-    okBut = Button(text="Login",command=getLogin).pack(padx=50, pady=(5,10))
+    Button(text="Login",command=getLogin).pack(padx=50, pady=(5,10))
     centerDat(logGUI)
-    logGUI.mainloop()
+    if(isWindows):
+        logGUI.mainloop()
 
 def main():
+    global isWindows, br, cj
+    if(platform.system()=="Windows"):
+        isWindows = True
     br.set_cookiejar(cj)
     br.set_handle_robots(False)
     br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0')]
