@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from Tkinter import *
-import mechanize, platform
+import mechanize, platform, os
 
 cj = mechanize.CookieJar()
 br = mechanize.Browser()
@@ -83,15 +83,16 @@ def inDepthDL(ending):
 
     hueHue = str(resp.read())
 
-    print hueHue
-    
     specificWOver = Tk()
-    getOverViewFrame(specificWOver, hueHue).pack()
+    specificWOver.title("Specific Grades")
+    getOverViewFrame(specificWOver, hueHue).pack(expand = 1, pady = 8, padx = 8)
     if oneStudent:
         newStuff = extractInfo(3, hueHue)
     else:
         newStuff = extractInfo(4, hueHue)
     print newStuff
+    if oneStudent==False:
+        getStudentButton(specificWOver).pack(pady=10)
     centerDat(specificWOver)
     if(isWindows):
         specificWOver.mainloop()
@@ -155,17 +156,19 @@ def getOverViewFrame(GUI, unProcPage):
                 Label(daFr,text=temp).grid(row=rows+1, column=columns)
     return daFr
 
-def GUIprintSel(page, Child, holdy):
+def getStudentButton(GUI):
     def studSelBut():
         GUISel.destroy()
         studentSel(holdy)
-
+    return Button(GUI,text="Select Student", command=studSelBut)
+        
+def GUIprintSel(page, Child, holdy):
     GUISel = Tk()
     GUISel.title(Child)
     ovs = getOverViewFrame(GUISel, page)
     ovs.pack(expand = 1, pady = 8, padx = 8)
     if oneStudent==False:
-        Button(GUISel,text="Select Student", command=studSelBut).pack(pady=10)
+        getStudentButton(GUISel).pack(pady=10)
     centerDat(GUISel)
     if(isWindows):
         GUISel.mainloop()
@@ -241,29 +244,61 @@ def cycleStuff(userNm, passWd):
     else:
         logGUIMeth()    
 
-def logGUIMeth():
+def logGUIMeth(username, password):
     def getLogin():
         uTemp=userHold.get()
         pTemp=passHold.get()
+        if(isChecked.get()):
+            logF = open("dep.dat", "w")
+            logF.write(uTemp+" "+pTemp)
+            logF.close()
+        else:
+            try:
+                os.remove("dep.dat")
+            except Exception:
+                pass
         logGUI.destroy()
         cycleStuff(uTemp,pTemp)
         return
+
     def entLog(evt):
         getLogin();
         return
+
+    def onCheckFlip():
+        if(isChecked.get()):
+            logF = open("dep.dat", "w")
+            logF.write(userHold.get()+" "+passHold.get())
+            logF.close()
+        else:
+            try:
+                os.remove("dep.dat")
+            except Exception:
+                pass
+        return
+
     logGUI = Tk()
     logGUI.title("Login Window")
     Label(logGUI,text="Login to GradeSpeed").pack(padx=50,pady=(10,5))
     Label(logGUI,text="Username:").pack(padx=50, pady=(5,0))
     userHold = StringVar()
+    userHold.set(username)
     userField = Entry(logGUI,textvariable=userHold)
     userField.pack(padx=50, pady=(0,5))
     userField.bind("<Key-Return>", entLog)
     Label(logGUI,text="Password:").pack(padx=50, pady=(5,0))
     passHold = StringVar()
+    passHold.set(password)
     passField = Entry(logGUI,textvariable=passHold, show = "*")
     passField.pack(padx=50, pady=(0,5))
     passField.bind("<Key-Return>", entLog)
+
+    isChecked = BooleanVar()
+    isChecked.set(len(username)>0)
+    framey = Frame(logGUI)
+    Checkbutton(framey, text="Remember Logon", var=isChecked, command=onCheckFlip).pack()
+    framey.pack(pady=5)
+    
     Button(text="Login",command=getLogin).pack(padx=50, pady=(5,10))
     centerDat(logGUI)
     if(isWindows):
@@ -271,12 +306,24 @@ def logGUIMeth():
 
 def main():
     global isWindows, br, cj
+    username=""
+    password=""
+    
+    try:
+        logonF = open("dep.dat")
+        temp = logonF.read()
+        username = str(temp).split(" ")[0]
+        password = str(temp).split(" ")[1]
+        logonF.close()
+    except Exception:
+        pass
+        
     if(platform.system()=="Windows"):
         isWindows = True
     br.set_cookiejar(cj)
     br.set_handle_robots(False)
     br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0')]
-    logGUIMeth()
+    logGUIMeth(username, password)
 
 if __name__ == "__main__":
     main()
