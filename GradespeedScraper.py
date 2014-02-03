@@ -90,7 +90,13 @@ def inDepthDL(ending):
         newStuff = extractInfo(3, hueHue)
     else:
         newStuff = extractInfo(4, hueHue)
-    print newStuff
+    lolol = newStuff.split(">")
+    lols2 = ""
+    for inf in lolol:
+        if len(inf.split("<")[0]) > 0:
+            lols2 = lols2 + inf.split("<")[0]+"\n"
+    #printMess(lols2)
+    print lols2
     if oneStudent==False:
         getStudentButton(specificWOver).pack(pady=10)
     centerDat(specificWOver)
@@ -240,9 +246,9 @@ def cycleStuff(userNm, passWd):
             else:
                 studentSel(studC.items)
         else:
-            logGUIMeth()
+            logGUIMeth("","")
     else:
-        logGUIMeth()    
+        logGUIMeth("","")    
 
 def logGUIMeth(username, password):
     def getLogin():
