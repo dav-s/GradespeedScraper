@@ -28,6 +28,9 @@ local.properties
 # PDT-specific
 .buildpath
 
+# Project created files
+dep.dat
+
 
 #################
 ## Visual Studio

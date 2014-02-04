@@ -1,4 +1,4 @@
-from BeautifulSoup import BeautifulSoup
+from bs4 import *
 from Tkinter import *
 import mechanize, platform, os
 
@@ -13,9 +13,9 @@ def centerDat(gui):
     yPos = (gui.winfo_screenheight()/2) - (gui.winfo_height()/2)
     gui.geometry("+%d+%d" % (xPos, yPos))
 
-def printMess(texty):
+def printMess(texty, titlee="Messaage"):
     popup = Tk()
-    popup.title("Message")
+    popup.title(titlee)
     Label(popup, text = texty).pack(padx=10,pady=10)
     centerDat(popup)
     if(isWindows):
@@ -90,13 +90,16 @@ def inDepthDL(ending):
         newStuff = extractInfo(3, hueHue)
     else:
         newStuff = extractInfo(4, hueHue)
-    lolol = newStuff.split(">")
-    lols2 = ""
-    for inf in lolol:
-        if len(inf.split("<")[0]) > 0:
-            lols2 = lols2 + inf.split("<")[0]+"\n"
-    #printMess(lols2)
-    print lols2
+    beauts = BeautifulSoup(newStuff)
+    wTitle = beauts.h3.string
+    print "%s\n" % wTitle
+    columns = (beauts.find_all("td",class_="AssignmentName"),beauts.find_all("td",class_="DateAssigned"),beauts.find_all("td",class_="DateDue"),beauts.find_all("td",class_="AssignmentGrade"),beauts.find_all("td",class_="AssignmentNote"))
+    formatStrTempl = "%-40s %8s %8s %8s\n"
+    datRes= (formatStrTempl+"\n") % ("Assignment Name", "Assigned", "Due Date", "Grade") 
+    for i in range(len(columns[0])):
+        datRes = datRes + (formatStrTempl+" -Note: %s\n\n") % (columns[0][i].string,columns[1][i].string,columns[2][i].string,columns[3][i].string,columns[4][i].string)
+    print datRes
+    #printMess(datRes, titlee=wTitle)
     if oneStudent==False:
         getStudentButton(specificWOver).pack(pady=10)
     centerDat(specificWOver)
@@ -122,10 +125,7 @@ def getOverViewFrame(GUI, unProcPage):
     numOCols= len(Cols)-1
     indexList = getTableDat.findAll("td")
     
-    extracted = []
-    
-    for rows in indexList:
-        extracted.append(rows.contents)
+    extracted = [rows.contents for rows in indexList]
 
     matric = []
     
@@ -206,7 +206,7 @@ def tableGet(options, iterator, namHold):
     if oneStudent!=True:
         GUIprintSel(oPage, name, namHold)
     else:
-        GUIprintSel(oPage, "1st", namHold)
+        GUIprintSel(oPage, "Grades", namHold)
 
 def cycleStuff(userNm, passWd):
     global oneStudent    
@@ -242,7 +242,7 @@ def cycleStuff(userNm, passWd):
                 oneStudent = True
 
             if oneStudent:
-                tableGet(["BLARRRGHHH!"], 0, ["Trolol"])
+                tableGet(["None"], 0, ["None"])
             else:
                 studentSel(studC.items)
         else:
