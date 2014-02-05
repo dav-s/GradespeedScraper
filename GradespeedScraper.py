@@ -13,9 +13,9 @@ def centerDat(gui):
     yPos = (gui.winfo_screenheight()/2) - (gui.winfo_height()/2)
     gui.geometry("+%d+%d" % (xPos, yPos))
 
-def printMess(texty, titlee="Messaage"):
+def printMess(texty, title="Message"):
     popup = Tk()
-    popup.title(titlee)
+    popup.title(title)
     Label(popup, text = texty).pack(padx=10,pady=10)
     centerDat(popup)
     if(isWindows):
@@ -28,13 +28,13 @@ def decodeString(inpt):
     while i < len(inpt):
 
         enc1 = keyStr.find(inpt[i])
-        i=i+1
+        i+=1
         enc2 = keyStr.find(inpt[i])
-        i=i+1
+        i+=1
         enc3 = keyStr.find(inpt[i])
-        i=i+1
+        i+=1
         enc4 = keyStr.find(inpt[i])
-        i=i+1
+        i+=1
         
         chr1 = (enc1 << 2) | (enc2 >> 4)
         chr2 = ((enc2 & 15) << 4) | (enc3 >> 2)
@@ -48,11 +48,11 @@ def decodeString(inpt):
             output = output + chr(chr3)
     return output
 
-def studentSel(studys):
-    name = str(studys)
+def studentSel():
+    name = str(nameInfo)
     fname = name.split("label='")[1].split("'")[0]
     names=[fname]
-    for i in range(1,len(studys)):
+    for i in range(1,len(nameInfo)):
         names.append(name.split("label='")[i+1].split("'")[0])
     def buttPress():
         inde=0
@@ -61,7 +61,7 @@ def studentSel(studys):
             if str(daTemp) in str(names[i]):
                 inde = i
         studSel.destroy()
-        tableGet(studys[inde], inde, studys)
+        tableGet(nameInfo[inde], inde, nameInfo)
     studSel = Tk()
     centerDat(studSel)
     studSel.title("Student Selection")
@@ -92,19 +92,30 @@ def inDepthDL(ending):
         newStuff = extractInfo(4, hueHue)
     beauts = BeautifulSoup(newStuff)
     wTitle = beauts.h3.string
-    print "%s\n" % wTitle
-    columns = (beauts.find_all("td",class_="AssignmentName"),beauts.find_all("td",class_="DateAssigned"),beauts.find_all("td",class_="DateDue"),beauts.find_all("td",class_="AssignmentGrade"),beauts.find_all("td",class_="AssignmentNote"))
-    formatStrTempl = "%-40s %8s %8s %8s\n"
-    datRes= (formatStrTempl+"\n") % ("Assignment Name", "Assigned", "Due Date", "Grade") 
-    for i in range(len(columns[0])):
-        datRes = datRes + (formatStrTempl+" -Note: %s\n\n") % (columns[0][i].string,columns[1][i].string,columns[2][i].string,columns[3][i].string,columns[4][i].string)
-    print datRes
-    #printMess(datRes, titlee=wTitle)
+    print beautDat(beauts)
+    #printMess(beautDat(beauts), title=wTitle)
     if oneStudent==False:
         getStudentButton(specificWOver).pack(pady=10)
     centerDat(specificWOver)
     if(isWindows):
         specificWOver.mainloop()
+
+def beautDat(beaut):
+    tempTypesG = zip(beaut.find_all(class_="CategoryName"),beaut.find_all(class_="DataTable"))
+    heads = [titless.string for titless in beaut.find(class_="TableHeader").find_all("th")]
+    heads = heads[0:len(heads)-1]
+    modPat = "%-45s"
+    for headTitle in heads[1:len(heads)-1]:
+        modPat+= " %"+str(len(headTitle) if (len(headTitle)>7) else 8)+"s"
+    strRes = "--- %s ---  %s  ---\n\n%s\n\n" % (beaut.h3.string,beaut.find(class_="CurrentAverage").string,(modPat % tuple(heads[0:len(heads)-1])))
+    modPat+= "\n -Note:%s\n\n"
+    for tup in tempTypesG:
+        strRes+= "-- %s --\n\n" % tup[0].string
+        for row in tup[1].find_all(class_=["DataRow","DataRowAlt"]):
+            strRes+= modPat % tuple([text.string for text in row.find_all("td")][0:len(heads)])
+        strRes+="\n"
+    return strRes + "\n"
+
 
 def getOverViewFrame(GUI, unProcPage):
 
@@ -164,8 +175,8 @@ def getOverViewFrame(GUI, unProcPage):
 
 def getStudentButton(GUI):
     def studSelBut():
-        GUISel.destroy()
-        studentSel(holdy)
+        GUI.destroy()
+        studentSel()
     return Button(GUI,text="Select Student", command=studSelBut)
         
 def GUIprintSel(page, Child, holdy):
@@ -184,7 +195,7 @@ def extractInfo(index, unProcessed):
     code=""
     for i in range(3,len(narrowed)):
         if i%2==1:
-            code=code+narrowed[i]
+            code+=narrowed[i]
     
     rawhtml = decodeString(code)
     woU8 = rawhtml.replace("&nbsp;","")
@@ -215,7 +226,7 @@ def cycleStuff(userNm, passWd):
     try:
         br.open("https://gradespeed.kleinisd.net/pc/Default.aspx")
     except Exception:
-        printMess("Please check if you are connected to the internet.")
+        printMess("Please check if you are connected to the internet.", title="Could Not Connect")
         Continue = False
         
     if Continue:
@@ -232,23 +243,21 @@ def cycleStuff(userNm, passWd):
         try:
             br.select_form("aspnetForm")
         except Exception:
-            printMess("Incorrect Username and/or Password.")
+            printMess("Incorrect Username and/or Password.", title="Error")
             Continue = False
             
         if(Continue):            
             try:
                 studC = br.form.find_control(nr=10)
+                nameInfo = studC.items
+                studentSel()
             except Exception:
                 oneStudent = True
-
-            if oneStudent:
                 tableGet(["None"], 0, ["None"])
-            else:
-                studentSel(studC.items)
         else:
-            logGUIMeth("","")
+            logGUIMeth(*(getFileTups()))
     else:
-        logGUIMeth("","")    
+        logGUIMeth(*(getFileTups()))   
 
 def logGUIMeth(username, password):
     def getLogin():
@@ -310,26 +319,24 @@ def logGUIMeth(username, password):
     if(isWindows):
         logGUI.mainloop()
 
-def main():
-    global isWindows, br, cj
-    username=""
-    password=""
-    
+def getFileTups():
     try:
         logonF = open("dep.dat")
         temp = logonF.read()
-        username = str(temp).split(" ")[0]
-        password = str(temp).split(" ")[1]
         logonF.close()
+        return (str(temp).split(" ")[0],str(temp).split(" ")[1])
     except Exception:
-        pass
+        return ("","")
+
+def main():
+    global isWindows, br, cj, nameInfo
         
     if(platform.system()=="Windows"):
         isWindows = True
     br.set_cookiejar(cj)
     br.set_handle_robots(False)
     br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0')]
-    logGUIMeth(username, password)
+    logGUIMeth(*(getFileTups()))
 
 if __name__ == "__main__":
     main()
