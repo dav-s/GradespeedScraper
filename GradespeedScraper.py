@@ -6,6 +6,7 @@ cj = mechanize.CookieJar()
 br = mechanize.Browser()
 isWindows = False
 oneStudent = False
+nameInfo = None
 
 def centerDat(gui):
     gui.update_idletasks()
@@ -107,11 +108,18 @@ def beautDat(beaut):
     modPat = "%-45s"
     for headTitle in heads[1:len(heads)-1]:
         modPat+= " %"+str(len(headTitle) if (len(headTitle)>7) else 8)+"s"
-    strRes = "--- %s ---  %s  ---\n\n%s\n\n" % (beaut.h3.string,beaut.find(class_="CurrentAverage").string,(modPat % tuple(heads[0:len(heads)-1])))
+    curAvg = beaut.find(class_="CurrentAverage").string
+    numsODash = 15 + len(beaut.h3.string) + len(curAvg)
+    strRes = ("-"*numsODash)+"\n"
+    strRes += "--- %s ---  %s  ---\n%s\n\n%s\n\n" % (beaut.h3.string, curAvg, ("-"*numsODash) ,(modPat % tuple(heads[0:len(heads)-1])))
     modPat+= "\n -Note:%s\n\n"
     for tup in tempTypesG:
-        strRes+= "-- %s --\n\n" % tup[0].string
-        for row in tup[1].find_all(class_=["DataRow","DataRowAlt"]):
+        datas = tup[1].find_all(class_=["DataRow","DataRowAlt"])
+        if len(datas)!=0:
+            strRes+= "-- %s --  Average : %s  --\n\n" % (tup[0].string,datas[len(datas)-1].findNextSibling("tr").find_all("td")[3].string)
+        else:
+            strRes+= "-- %s --\n\n" % tup[0].string
+        for row in datas:
             strRes+= modPat % tuple([text.string for text in row.find_all("td")][0:len(heads)])
         strRes+="\n"
     return strRes + "\n"
@@ -220,7 +228,7 @@ def tableGet(options, iterator, namHold):
         GUIprintSel(oPage, "Grades", namHold)
 
 def cycleStuff(userNm, passWd):
-    global oneStudent    
+    global oneStudent, nameInfo
     Continue = True
     
     try:
@@ -253,7 +261,7 @@ def cycleStuff(userNm, passWd):
                 studentSel()
             except Exception:
                 oneStudent = True
-                tableGet(["None"], 0, ["None"])
+                tableGet(None, 0, None)
         else:
             logGUIMeth(*(getFileTups()))
     else:
@@ -329,7 +337,7 @@ def getFileTups():
         return ("","")
 
 def main():
-    global isWindows, br, cj, nameInfo
+    global isWindows, br, cj
         
     if(platform.system()=="Windows"):
         isWindows = True
