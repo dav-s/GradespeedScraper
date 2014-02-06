@@ -127,9 +127,9 @@ def beautDat(beaut):
 
 def getOverViewFrame(GUI, unProcPage):
 
-    def inDepthSetup(str):
+    def inDepthSetup(stri):
         GUI.destroy()
-        inDepthDL(str)
+        inDepthDL(stri)
 
     if oneStudent:
         done = extractInfo(2, str(unProcPage))
@@ -176,7 +176,7 @@ def getOverViewFrame(GUI, unProcPage):
             holda=holda+1
             if isLink:
                 temper = str(matric[rows][columns]).split('href="')[1].split('"')[0]
-                Button(daFr,text=temp, command=lambda temper = temper:inDepthSetup(temper)).grid(row=rows+1, column=columns)
+                Button(daFr,text=temp, command=lambda : inDepthSetup(temper)).grid(row=rows+1, column=columns)
             else:
                 Label(daFr,text=temp).grid(row=rows+1, column=columns)
     return daFr
