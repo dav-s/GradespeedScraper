@@ -1,10 +1,9 @@
 from bs4 import *
 from Tkinter import *
-import mechanize, platform, os
+import mechanize, os
 
 cj = mechanize.CookieJar()
 br = mechanize.Browser()
-isWindows = False
 oneStudent = False
 nameInfo = None
 
@@ -19,8 +18,8 @@ def printMess(texty, title="Message"):
     popup.title(title)
     Label(popup, text = texty).pack(padx=10,pady=10)
     centerDat(popup)
-    if(isWindows):
-        popup.mainloop()
+    
+    popup.mainloop()
 
 def decodeString(inpt):
     keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
@@ -71,8 +70,8 @@ def studentSel():
     Label(text="Select a student:").pack(padx=50, pady=(10,5))
     OptionMenu(studSel, var, *names).pack(padx=50, pady=10)
     Button(text="Continue", command=buttPress).pack(padx=50, pady=(5,10))
-    if(isWindows):
-        studSel.mainloop()
+    
+    studSel.mainloop()
     
 
 def inDepthDL(ending):
@@ -98,8 +97,8 @@ def inDepthDL(ending):
     if oneStudent==False:
         getStudentButton(specificWOver).pack(pady=10)
     centerDat(specificWOver)
-    if(isWindows):
-        specificWOver.mainloop()
+    
+    specificWOver.mainloop()
 
 def beautDat(beaut):
     tempTypesG = zip(beaut.find_all(class_="CategoryName"),beaut.find_all(class_="DataTable"))
@@ -176,7 +175,7 @@ def getOverViewFrame(GUI, unProcPage):
             holda=holda+1
             if isLink:
                 temper = str(matric[rows][columns]).split('href="')[1].split('"')[0]
-                Button(daFr,text=temp, command=lambda : inDepthSetup(temper)).grid(row=rows+1, column=columns)
+                Button(daFr,text=temp, command=lambda temper = temper : inDepthSetup(temper)).grid(row=rows+1, column=columns)
             else:
                 Label(daFr,text=temp).grid(row=rows+1, column=columns)
     return daFr
@@ -195,8 +194,8 @@ def GUIprintSel(page, Child, holdy):
     if oneStudent==False:
         getStudentButton(GUISel).pack(pady=10)
     centerDat(GUISel)
-    if(isWindows):
-        GUISel.mainloop()
+    
+    GUISel.mainloop()
 
 def extractInfo(index, unProcessed):
     narrowed = unProcessed.split("var")[index].split("document.write")[0].split("'")
@@ -324,8 +323,8 @@ def logGUIMeth(username, password):
     
     Button(text="Login",command=getLogin).pack(padx=50, pady=(5,10))
     centerDat(logGUI)
-    if(isWindows):
-        logGUI.mainloop()
+    
+    logGUI.mainloop()
 
 def getFileTups():
     try:
@@ -337,10 +336,8 @@ def getFileTups():
         return ("","")
 
 def main():
-    global isWindows, br, cj
-        
-    if(platform.system()=="Windows"):
-        isWindows = True
+    global br, cj
+
     br.set_cookiejar(cj)
     br.set_handle_robots(False)
     br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0')]
