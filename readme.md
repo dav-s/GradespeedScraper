@@ -15,9 +15,10 @@
 * The login currently saves in the directory in which the Python script is saved.
 * Be careful if you are saving your login. The current version does not encrypt the passwords and stores the logins in plain text.
 
-### Contact
-* My GitHub: https://github.com/EpicDavi/
-* GitHub Project Page: https://github.com/EpicDavi/GradespeedScraper
-* Contact Me at: EpicDaviBrickFilms@gmail.com
+### Links and Contact
+* [My GitHub](https://github.com/EpicDavi/)
+* [GitHub Project Page](https://github.com/EpicDavi/GradespeedScraper/)
+* [Project Site](http://epicdavi.github.io/GradespeedScraper/)
+* Email: EpicDaviBrickFilms@gmail.com
 
 #### _-EpicDavi_
