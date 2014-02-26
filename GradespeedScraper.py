@@ -1,6 +1,7 @@
 from bs4 import *
 from Tkinter import *
 import mechanize, os
+from stringcode import decodeString
 
 cj = mechanize.CookieJar()
 br = mechanize.Browser()
@@ -21,32 +22,6 @@ def printMess(texty, title="Message"):
     
     popup.mainloop()
 
-def decodeString(inpt):
-    keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
-    output = ""
-    i=0
-    while i < len(inpt):
-
-        enc1 = keyStr.find(inpt[i])
-        i+=1
-        enc2 = keyStr.find(inpt[i])
-        i+=1
-        enc3 = keyStr.find(inpt[i])
-        i+=1
-        enc4 = keyStr.find(inpt[i])
-        i+=1
-        
-        chr1 = (enc1 << 2) | (enc2 >> 4)
-        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2)
-        chr3 = ((enc3 & 3) << 6) | enc4
-        output = output + chr(chr1)
-        
-        if enc3 != 64:
-            output = output + chr(chr2)
-
-        if enc4 != 64:
-            output = output + chr(chr3)
-    return output
 
 def studentSel():
     name = str(nameInfo)
