@@ -13,7 +13,7 @@
 
 ### Important Notes
 * The login currently saves in the directory in which the Python script is saved.
-* Be careful if you are saving your login. The current version does not encrypt the passwords and stores the logins in plain text.
+* Be careful if you are saving your login. This version saves the logins via the encryption that GradeSpeed uses. Your passwords are secure to some extent, but if someone with a little motivation and some malicious intent could reverse engineer my code and de-encrypt the file.
 
 ### Links and Contact
 * [My GitHub](https://github.com/EpicDavi/)

@@ -1,7 +1,7 @@
 from bs4 import *
 from Tkinter import *
 import mechanize, os
-from stringcode import decodeString
+from stringcode import decodeString, encodeString
 
 cj = mechanize.CookieJar()
 br = mechanize.Browser()
@@ -247,7 +247,7 @@ def logGUIMeth(username, password):
         pTemp=passHold.get()
         if(isChecked.get()):
             logF = open("dep.dat", "w")
-            logF.write(uTemp+" "+pTemp)
+            logF.write(encodeString(uTemp+" "+pTemp))
             logF.close()
         else:
             try:
@@ -265,7 +265,7 @@ def logGUIMeth(username, password):
     def onCheckFlip():
         if(isChecked.get()):
             logF = open("dep.dat", "w")
-            logF.write(userHold.get()+" "+passHold.get())
+            logF.write(encodeString(userHold.get()+" "+passHold.get()))
             logF.close()
         else:
             try:
@@ -304,7 +304,7 @@ def logGUIMeth(username, password):
 def getFileTups():
     try:
         logonF = open("dep.dat")
-        temp = logonF.read()
+        temp = decodeString(logonF.read())
         logonF.close()
         return (str(temp).split(" ")[0],str(temp).split(" ")[1])
     except Exception:
