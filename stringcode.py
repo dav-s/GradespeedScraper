@@ -1,5 +1,6 @@
 keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
 
+
 def getCharSafe(strin, index, func, oth):
     try:
         return func(strin[index])
@@ -7,19 +8,20 @@ def getCharSafe(strin, index, func, oth):
         pass
     return oth
 
+
 def decodeString(to_dec):
     output = ""
-    i=0
+    i = 0
     while i < len(to_dec):
 
         enc1 = getCharSafe(to_dec, i, keyStr.find, 0)
-        i+=1
+        i += 1
         enc2 = getCharSafe(to_dec, i, keyStr.find, 0)
-        i+=1
+        i += 1
         enc3 = getCharSafe(to_dec, i, keyStr.find, 0)
-        i+=1
+        i += 1
         enc4 = getCharSafe(to_dec, i, keyStr.find, 0)
-        i+=1
+        i += 1
         
         chr1 = (enc1 << 2) | (enc2 >> 4)
         chr2 = ((enc2 & 15) << 4) | (enc3 >> 2)
@@ -34,16 +36,17 @@ def decodeString(to_dec):
             output = output + chr(chr3)
     return output
 
+
 def encodeString(to_enc):
     output = ""
     i = 0
     while i < len(to_enc):
         chr1 = getCharSafe(to_enc, i, ord, 0)
-        i+=1
+        i += 1
         chr2 = getCharSafe(to_enc, i, ord, 0)
-        i+=1
+        i += 1
         chr3 = getCharSafe(to_enc, i, ord, 0)
-        i+=1
+        i += 1
 
         enc1 = chr1 >> 2
         enc2 = ((chr1 & 3) << 4) | (chr2 >> 4)
