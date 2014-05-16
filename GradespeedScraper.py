@@ -3,7 +3,6 @@ from Tkinter import *
 import mechanize, os
 from stringcode import decodeString, encodeString
 
-cj = mechanize.CookieJar()
 br = mechanize.Browser()
 oneStudent = False
 nameInfo = None
@@ -11,9 +10,9 @@ nameInfo = None
 
 def centerDat(gui):
     gui.update_idletasks()
-    xPos = (gui.winfo_screenwidth()/2) - (gui.winfo_width()/2)
-    yPos = (gui.winfo_screenheight()/2) - (gui.winfo_height()/2)
-    gui.geometry("+%d+%d" % (xPos, yPos))
+    x_pos = (gui.winfo_screenwidth()/2) - (gui.winfo_width()/2)
+    y_pos = (gui.winfo_screenheight()/2) - (gui.winfo_height()/2)
+    gui.geometry("+%d+%d" % (x_pos, y_pos))
 
 
 def printMess(texty, title="Message"):
@@ -54,6 +53,7 @@ def studentSel():
 
 def inDepthDL(ending):
     link = "https://gradespeed.kleinisd.net/pc/ParentStudentGrades.aspx"+ending
+    resp = None
     try:
         resp = br.open(link)
     except Exception:
@@ -92,14 +92,14 @@ def beautDat(beaut):
     strRes += "--- %s ---  %s  ---\n%s\n\n%s\n\n" % (beaut.h3.string, curAvg, ("-"*numsODash) ,(modPat % tuple(heads[0:len(heads)-1])))
     modPat += "\n -Note:%s\n\n"
     for tup in tempTypesG:
-        datas = tup[1].find_all(class_=["DataRow","DataRowAlt"])
+        datas = tup[1].find_all(class_=["DataRow", "DataRowAlt"])
         if len(datas)!=0:
             strRes += "-- %s --  Average : %s  --\n\n" % (tup[0].string, datas[len(datas)-1].findNextSibling("tr").find_all("td")[3].string)
         else:
             strRes += "-- %s --\n\n" % tup[0].string
         for row in datas:
             strRes+= modPat % tuple([text.string for text in row.find_all("td")][0:len(heads)])
-        strRes+="\n"
+        strRes += "\n"
     return strRes + "\n"
 
 
@@ -154,7 +154,7 @@ def getOverViewFrame(GUI, unProcPage):
             holda += 1
             if isLink:
                 temper = str(matric[rows][columns]).split('href="')[1].split('"')[0]
-                Button(daFr,text=temp, command=lambda temper = temper: inDepthSetup(temper)).grid(row=rows+1, column=columns)
+                Button(daFr, text=temp, command=lambda temper = temper: inDepthSetup(temper)).grid(row=rows+1, column=columns)
             else:
                 Label(daFr,text=temp).grid(row=rows+1, column=columns)
     return daFr
@@ -172,7 +172,7 @@ def GUIprintSel(page, Child, holdy):
     GUISel.title(Child)
     ovs = getOverViewFrame(GUISel, page)
     ovs.pack(expand = 1, pady = 8, padx = 8)
-    if oneStudent==False:
+    if not oneStudent:
         getStudentButton(GUISel).pack(pady=10)
     centerDat(GUISel)
     
@@ -181,7 +181,7 @@ def GUIprintSel(page, Child, holdy):
 def extractInfo(index, unProcessed):
     narrowed = unProcessed.split("var")[index].split("document.write")[0].split("'")
     code=""
-    for i in range(3,len(narrowed)):
+    for i in range(3, len(narrowed)):
         if i % 2 == 1:
             code += narrowed[i]
     
@@ -192,9 +192,11 @@ def extractInfo(index, unProcessed):
 
 def tableGet(options, iterator, namHold):
     global br
-    if oneStudent!=True:
-        name = str(namHold)
-        name=name.split("label='")[iterator+1].split("'")[0]
+
+    name = str(namHold)
+
+    if not oneStudent:
+        name = name.split("label='")[iterator+1].split("'")[0]
         br.select_form("aspnetForm")
         studCaux = br.form.find_control(nr=10)
         studCaux.value = [options.name]
@@ -203,30 +205,30 @@ def tableGet(options, iterator, namHold):
     oGrade = br.follow_link(text_regex="Grades")
     oPage = oGrade.read()
 
-    if oneStudent!=True:
+    if not oneStudent:
         GUIprintSel(oPage, name, namHold)
     else:
         GUIprintSel(oPage, "Grades", namHold)
 
 
-def cycleStuff(userNm, passWd):
+def cycleStuff(username, password):
     global oneStudent, nameInfo
-    Continue = True
+    should_continue = True
     
     try:
         br.open("https://gradespeed.kleinisd.net/pc/Default.aspx")
     except Exception:
         printMess("Please check if you are connected to the internet.", title="Could Not Connect")
-        Continue = False
+        should_continue = False
         
-    if Continue:
+    if should_continue:
         br.select_form("Form1")
         
         userCtrl = br.form.find_control("txtUserName")
         passwrdCtrl = br.form.find_control("txtPassword")
         
-        userCtrl.value = userNm
-        passwrdCtrl.value = passWd
+        userCtrl.value = username
+        passwrdCtrl.value = password
 
         br.submit()
         
@@ -234,9 +236,9 @@ def cycleStuff(userNm, passWd):
             br.select_form("aspnetForm")
         except Exception:
             printMess("Incorrect Username and/or Password.", title="Error")
-            Continue = False
+            should_continue = False
             
-        if Continue:
+        if should_continue:
             try:
                 studC = br.form.find_control(nr=10)
                 nameInfo = studC.items
@@ -245,88 +247,81 @@ def cycleStuff(userNm, passWd):
                 oneStudent = True
                 tableGet(None, 0, None)
         else:
-            logGUIMeth(*(getFileTups()))
+            login_gui(*(get_file_tuple()))
     else:
-        logGUIMeth(*(getFileTups()))   
+        login_gui(*(get_file_tuple()))
 
 
-def logGUIMeth(username, password):
-    def getLogin():
-        uTemp=userHold.get()
-        pTemp=passHold.get()
-        if(isChecked.get()):
-            logF = open("dep.dat", "w")
-            logF.write(encodeString(uTemp+" "+pTemp))
-            logF.close()
+def login_gui(username, password):
+    def get_login():
+        temp_username = username_holder.get()
+        temp_password = password_holder.get()
+        if remember_login_holder.get():
+            logon_file = open("dep.dat", "w")
+            logon_file.write(encodeString(temp_username+" "+temp_password))
+            logon_file.close()
         else:
-            try:
+            if os.path.isfile("dep.dat"):
                 os.remove("dep.dat")
-            except Exception:
-                pass
-        logGUI.destroy()
-        cycleStuff(uTemp,pTemp)
+        login_tk.destroy()
+        cycleStuff(temp_username, temp_password)
         return
 
-    def entLog(evt):
-        getLogin()
+    def enter_login(evt):
+        get_login()
         return
 
-    def onCheckFlip():
-        if isChecked.get():
-            logF = open("dep.dat", "w")
-            logF.write(encodeString(userHold.get()+" "+passHold.get()))
-            logF.close()
+    def on_checkbox_flip():
+        if remember_login_holder.get():
+            logon_file = open("dep.dat", "w")
+            logon_file.write(encodeString(username_holder.get()+" "+password_holder.get()))
+            logon_file.close()
         else:
-            try:
+            if os.path.isfile("dep.dat"):
                 os.remove("dep.dat")
-            except Exception:
-                pass
         return
 
-    logGUI = Tk()
-    logGUI.title("Login Window")
-    Label(logGUI,text="Login to GradeSpeed").pack(padx=50,pady=(10, 5))
-    Label(logGUI,text="Username:").pack(padx=50, pady=(5, 0))
-    userHold = StringVar()
-    userHold.set(username)
-    userField = Entry(logGUI,textvariable=userHold)
-    userField.pack(padx=50, pady=(0,5))
-    userField.bind("<Key-Return>", entLog)
-    Label(logGUI,text="Password:").pack(padx=50, pady=(5,0))
-    passHold = StringVar()
-    passHold.set(password)
-    passField = Entry(logGUI,textvariable=passHold, show = "*")
-    passField.pack(padx=50, pady=(0, 5))
-    passField.bind("<Key-Return>", entLog)
+    login_tk = Tk()
+    login_tk.title("Login Window")
+    Label(login_tk, text="Login to GradeSpeed").pack(padx=50, pady=(10, 5))
+    Label(login_tk, text="Username:").pack(padx=50, pady=(5, 0))
+    username_holder = StringVar()
+    username_holder.set(username)
+    username_field = Entry(login_tk, textvariable=username_holder)
+    username_field.pack(padx=50, pady=(0, 5))
+    username_field.bind("<Key-Return>", enter_login)
+    Label(login_tk, text="Password:").pack(padx=50, pady=(5, 0))
+    password_holder = StringVar()
+    password_holder.set(password)
+    password_field = Entry(login_tk, textvariable=password_holder, show="*")
+    password_field.pack(padx=50, pady=(0, 5))
+    password_field.bind("<Key-Return>", enter_login)
 
-    isChecked = BooleanVar()
-    isChecked.set(len(username)>0)
-    framey = Frame(logGUI)
-    Checkbutton(framey, text="Remember Logon", var=isChecked, command=onCheckFlip).pack()
-    framey.pack(pady=5)
+    remember_login_holder = BooleanVar()
+    remember_login_holder.set(len(username) > 0)
+    login_frame = Frame(login_tk)
+    Checkbutton(login_frame, text="Remember Logon", var=remember_login_holder, command=on_checkbox_flip).pack()
+    login_frame.pack(pady=5)
     
-    Button(text="Login", command=getLogin).pack(padx=50, pady=(5, 10))
-    centerDat(logGUI)
+    Button(text="Login", command=get_login).pack(padx=50, pady=(5, 10))
+    centerDat(login_tk)
     
-    logGUI.mainloop()
+    login_tk.mainloop()
 
 
-def getFileTups():
-    try:
-        logonF = open("dep.dat")
-        temp = decodeString(logonF.read())
-        logonF.close()
+def get_file_tuple():
+    if os.path.isfile("dep.dat"):
+        logon_file = open("dep.dat")
+        temp = decodeString(logon_file.read())
+        logon_file.close()
         return str(temp).split(" ")[0], str(temp).split(" ")[1]
-    except Exception:
-        return "", ""
+    return "", ""
 
 
 def main():
-    global br, cj
-
-    br.set_cookiejar(cj)
+    global br
     br.set_handle_robots(False)
-    logGUIMeth(*(getFileTups()))
+    login_gui(*(get_file_tuple()))
 
 if __name__ == "__main__":
     main()
