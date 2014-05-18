@@ -1,27 +1,12 @@
 from bs4 import *
 from Tkinter import *
-import mechanize, os
-from stringcode import decodeString, encodeString
+import mechanize, os, json
+from stringcode import decode_string, encode_string
+from tkgui_utils import center_gui, print_message
 
 br = mechanize.Browser()
-oneStudent = False
+is_one_student = False
 nameInfo = None
-
-
-def centerDat(gui):
-    gui.update_idletasks()
-    x_pos = (gui.winfo_screenwidth()/2) - (gui.winfo_width()/2)
-    y_pos = (gui.winfo_screenheight()/2) - (gui.winfo_height()/2)
-    gui.geometry("+%d+%d" % (x_pos, y_pos))
-
-
-def printMess(texty, title="Message"):
-    popup = Tk()
-    popup.title(title)
-    Label(popup, text=texty).pack(padx=10, pady=10)
-    centerDat(popup)
-    
-    popup.mainloop()
 
 
 def studentSel():
@@ -40,7 +25,7 @@ def studentSel():
         studSel.destroy()
         tableGet(nameInfo[inde], inde, nameInfo)
     studSel = Tk()
-    centerDat(studSel)
+    center_gui(studSel)
     studSel.title("Student Selection")
     var = StringVar()
     var.set(fname)
@@ -52,34 +37,34 @@ def studentSel():
     
 
 def inDepthDL(ending):
-    link = "https://gradespeed.kleinisd.net/pc/ParentStudentGrades.aspx"+ending
+    link = config["specific-url"]+ending
     resp = None
     try:
         resp = br.open(link)
     except Exception:
-        printMess("Sorry. There was an error.")
+        print_message("Sorry. There was an error.")
 
     hueHue = str(resp.read())
 
     specificWOver = Tk()
     specificWOver.title("Specific Grades")
-    getOverViewFrame(specificWOver, hueHue).pack(expand = 1, pady = 8, padx = 8)
-    if oneStudent:
+    getOverViewFrame(specificWOver, hueHue).pack(expand=1, pady=8, padx=8)
+    if is_one_student:
         newStuff = extractInfo(3, hueHue)
     else:
         newStuff = extractInfo(4, hueHue)
     beauts = BeautifulSoup(newStuff)
     wTitle = beauts.h3.string
-    print beautDat(beauts)
+    print class_grades_to_pretty_string(beauts)
     #printMess(beautDat(beauts), title=wTitle)
-    if not oneStudent:
+    if not is_one_student:
         getStudentButton(specificWOver).pack(pady=10)
-    centerDat(specificWOver)
+    center_gui(specificWOver)
     
     specificWOver.mainloop()
 
 
-def beautDat(beaut):
+def class_grades_to_pretty_string(beaut):
     tempTypesG = zip(beaut.find_all(class_="CategoryName"), beaut.find_all(class_="DataTable"))
     heads = [titless.string for titless in beaut.find(class_="TableHeader").find_all("th")]
     heads = heads[0:len(heads)-1]
@@ -89,7 +74,7 @@ def beautDat(beaut):
     curAvg = beaut.find(class_="CurrentAverage").string
     numsODash = 15 + len(beaut.h3.string) + len(curAvg)
     strRes = ("-"*numsODash)+"\n"
-    strRes += "--- %s ---  %s  ---\n%s\n\n%s\n\n" % (beaut.h3.string, curAvg, ("-"*numsODash) ,(modPat % tuple(heads[0:len(heads)-1])))
+    strRes += "--- %s ---  %s  ---\n%s\n\n%s\n\n" % (beaut.h3.string, curAvg, ("-"*numsODash), (modPat % tuple(heads[0:len(heads)-1])))
     modPat += "\n -Note:%s\n\n"
     for tup in tempTypesG:
         datas = tup[1].find_all(class_=["DataRow", "DataRowAlt"])
@@ -98,7 +83,7 @@ def beautDat(beaut):
         else:
             strRes += "-- %s --\n\n" % tup[0].string
         for row in datas:
-            strRes+= modPat % tuple([text.string for text in row.find_all("td")][0:len(heads)])
+            strRes += modPat % tuple([text.string for text in row.find_all("td")][0:len(heads)])
         strRes += "\n"
     return strRes + "\n"
 
@@ -109,7 +94,7 @@ def getOverViewFrame(GUI, unProcPage):
         GUI.destroy()
         inDepthDL(stri)
 
-    if oneStudent:
+    if is_one_student:
         done = extractInfo(2, str(unProcPage))
     else:
         done = extractInfo(3, str(unProcPage))
@@ -156,7 +141,7 @@ def getOverViewFrame(GUI, unProcPage):
                 temper = str(matric[rows][columns]).split('href="')[1].split('"')[0]
                 Button(daFr, text=temp, command=lambda temper = temper: inDepthSetup(temper)).grid(row=rows+1, column=columns)
             else:
-                Label(daFr,text=temp).grid(row=rows+1, column=columns)
+                Label(daFr, text=temp).grid(row=rows+1, column=columns)
     return daFr
 
 
@@ -171,12 +156,13 @@ def GUIprintSel(page, Child, holdy):
     GUISel = Tk()
     GUISel.title(Child)
     ovs = getOverViewFrame(GUISel, page)
-    ovs.pack(expand = 1, pady = 8, padx = 8)
-    if not oneStudent:
+    ovs.pack(expand=1, pady=8, padx=8)
+    if not is_one_student:
         getStudentButton(GUISel).pack(pady=10)
-    centerDat(GUISel)
+    center_gui(GUISel)
     
     GUISel.mainloop()
+
 
 def extractInfo(index, unProcessed):
     narrowed = unProcessed.split("var")[index].split("document.write")[0].split("'")
@@ -185,7 +171,7 @@ def extractInfo(index, unProcessed):
         if i % 2 == 1:
             code += narrowed[i]
     
-    rawhtml = decodeString(code)
+    rawhtml = decode_string(code)
     woU8 = rawhtml.replace("&nbsp;", "")
     return woU8
 
@@ -195,7 +181,7 @@ def tableGet(options, iterator, namHold):
 
     name = str(namHold)
 
-    if not oneStudent:
+    if not is_one_student:
         name = name.split("label='")[iterator+1].split("'")[0]
         br.select_form("aspnetForm")
         studCaux = br.form.find_control(nr=10)
@@ -205,20 +191,20 @@ def tableGet(options, iterator, namHold):
     oGrade = br.follow_link(text_regex="Grades")
     oPage = oGrade.read()
 
-    if not oneStudent:
+    if not is_one_student:
         GUIprintSel(oPage, name, namHold)
     else:
         GUIprintSel(oPage, "Grades", namHold)
 
 
 def cycleStuff(username, password):
-    global oneStudent, nameInfo
+    global is_one_student, nameInfo
     should_continue = True
     
     try:
-        br.open("https://gradespeed.kleinisd.net/pc/Default.aspx")
+        br.open(config["main-url"])
     except Exception:
-        printMess("Please check if you are connected to the internet.", title="Could Not Connect")
+        print_message("Please check if you are connected to the internet.", title="Could Not Connect")
         should_continue = False
         
     if should_continue:
@@ -235,7 +221,7 @@ def cycleStuff(username, password):
         try:
             br.select_form("aspnetForm")
         except Exception:
-            printMess("Incorrect Username and/or Password.", title="Error")
+            print_message("Incorrect Username and/or Password.", title="Error")
             should_continue = False
             
         if should_continue:
@@ -244,7 +230,7 @@ def cycleStuff(username, password):
                 nameInfo = studC.items
                 studentSel()
             except Exception:
-                oneStudent = True
+                is_one_student = True
                 tableGet(None, 0, None)
         else:
             login_gui(*(get_file_tuple()))
@@ -258,7 +244,7 @@ def login_gui(username, password):
         temp_password = password_holder.get()
         if remember_login_holder.get():
             logon_file = open("dep.dat", "w")
-            logon_file.write(encodeString(temp_username+" "+temp_password))
+            logon_file.write(encode_string(temp_username+" "+temp_password))
             logon_file.close()
         else:
             if os.path.isfile("dep.dat"):
@@ -274,7 +260,7 @@ def login_gui(username, password):
     def on_checkbox_flip():
         if remember_login_holder.get():
             logon_file = open("dep.dat", "w")
-            logon_file.write(encodeString(username_holder.get()+" "+password_holder.get()))
+            logon_file.write(encode_string(username_holder.get()+" "+password_holder.get()))
             logon_file.close()
         else:
             if os.path.isfile("dep.dat"):
@@ -304,7 +290,7 @@ def login_gui(username, password):
     login_frame.pack(pady=5)
     
     Button(text="Login", command=get_login).pack(padx=50, pady=(5, 10))
-    centerDat(login_tk)
+    center_gui(login_tk)
     
     login_tk.mainloop()
 
@@ -312,15 +298,24 @@ def login_gui(username, password):
 def get_file_tuple():
     if os.path.isfile("dep.dat"):
         logon_file = open("dep.dat")
-        temp = decodeString(logon_file.read())
+        temp = decode_string(logon_file.read())
         logon_file.close()
         return str(temp).split(" ")[0], str(temp).split(" ")[1]
     return "", ""
 
 
 def main():
-    global br
+    global br, config
     br.set_handle_robots(False)
+
+    if os.path.isfile("config.json"):
+        conf_file = open("config.json")
+        config = json.loads(conf_file.read())
+        conf_file.close()
+    else:
+        print 'You need to have the "config.json".'
+        return
+
     login_gui(*(get_file_tuple()))
 
 if __name__ == "__main__":
