@@ -1,5 +1,9 @@
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
 
 setup(name='GradespeedScraper',
       version='0.1',
@@ -7,5 +11,5 @@ setup(name='GradespeedScraper',
       author='Davis Robertson',
       author_email='davis@daviskr.com',
       url='https://github.com/epicdavi/GradespeedScraper/',
-      packages=['mechanize', 'beautifulsoup4'],
+      install_requires=['mechanize', 'beautifulsoup4'],
       )

@@ -2,3 +2,6 @@
 dep.dat
 GradespeedScraper.iml
 *.pyc
+*.egg-info/
+dist/
+build/
