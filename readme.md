@@ -6,8 +6,8 @@
 
 ### Installation Instructions
 * Install Python ~2.7.
-* Install BeautifulSoup4 and Mechanize via _pip_ or an alternative. (Make sure it is BeautifulSoup4 and not an earlier version)
-* Download GradespeedScraper.py
+* Run `setup.py install`
+* Download `GradespeedScraper.py`
 * Run the script.
 * Enjoy and report any issues on GitHub!
 
