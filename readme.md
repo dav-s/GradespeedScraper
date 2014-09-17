@@ -18,7 +18,6 @@
 ### Links and Contact
 * [My GitHub](https://github.com/EpicDavi/)
 * [GitHub Project Page](https://github.com/EpicDavi/GradespeedScraper/)
-* [Project Site](http://epicdavi.github.io/GradespeedScraper/)
-* Email: EpicDaviBrickFilms@gmail.com
+* Email: davis@daviskr.com
 
 #### _-EpicDavi_
