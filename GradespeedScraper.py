@@ -3,6 +3,7 @@ from Tkinter import *
 import mechanize, os, json
 from stringcode import decode_string, encode_string
 from tkgui_utils import center_gui, print_message
+from Wrapper import Wrapper, Link
 
 br = mechanize.Browser()
 is_one_student = False
@@ -319,5 +320,31 @@ def main():
     login_gui(*(get_file_tuple()))
 
 if __name__ == "__main__":
-    main()
-
+    #main()
+    wr = Wrapper("https://gradespeed.kleinisd.net/pc/Default.aspx")
+    wr.login("username", "password")
+    gs = wr.get_student_grades_overview()["grades"]
+    grades = [gs["headers"]]
+    grades.extend(gs["rows"])
+    linky = None
+    for row in grades:
+        colstr = ""
+        rown = 1
+        for col in row:
+            if isinstance(col, Link):
+                linky = col
+            if rown == 1:
+                colstr += "%15s" % str(col)
+                rown += 1
+            elif rown == 2:
+                colstr += "%25s" % str(col)
+                rown += 1
+            else:
+                colstr += "%10s" % str(col if col is not None else "-")
+        print colstr
+    if linky is None:
+        print "what"
+    else:
+        dicty = wr.get_class_grades(linky)
+        for sect in dicty["sections"]:
+            print sect
