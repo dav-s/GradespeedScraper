@@ -61,3 +61,4 @@ def encode_string(to_enc):
 
         output = output + keyStr[enc1] + keyStr[enc2] + keyStr[enc3] + keyStr[enc4]
     return output
+
