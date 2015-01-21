@@ -1,0 +1,1 @@
+main_url = "https://gradespeed.kleinisd.net/pc/ParentStudentGrades.aspx"
