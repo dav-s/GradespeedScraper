@@ -7,7 +7,7 @@ import os
 
 
 def login_gui(username, password):
-    def get_login():
+    def get_login(evt=None):
         temp_username = username_holder.get()
         temp_password = password_holder.get()
         if remember_login_holder.get():
@@ -19,10 +19,6 @@ def login_gui(username, password):
                 os.remove("dep.dat")
         login_tk.destroy()
         wrapper_gui(temp_username, temp_password)
-        return
-
-    def enter_login(evt):
-        get_login()
         return
 
     def on_checkbox_flip():
@@ -43,13 +39,13 @@ def login_gui(username, password):
     username_holder.set(username)
     username_field = Entry(login_tk, textvariable=username_holder)
     username_field.pack(padx=50, pady=(0, 5))
-    username_field.bind("<Key-Return>", enter_login)
+    username_field.bind("<Key-Return>", get_login)
     Label(login_tk, text="Password:").pack(padx=50, pady=(5, 0))
     password_holder = StringVar()
     password_holder.set(password)
     password_field = Entry(login_tk, textvariable=password_holder, show="*")
     password_field.pack(padx=50, pady=(0, 5))
-    password_field.bind("<Key-Return>", enter_login)
+    password_field.bind("<Key-Return>", get_login)
 
     remember_login_holder = BooleanVar()
     remember_login_holder.set(len(username) > 0)
