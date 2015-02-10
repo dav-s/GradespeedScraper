@@ -8,7 +8,7 @@
 * Install Python ~2.7.
 * Clone this repository (`git clone https://github.com/EpicDavi/GradespeedScraper/`)
 * Run `setup.py install`
-* Run the script.
+* Run `gui.py` for the demo interface..
 * Enjoy and report any issues on GitHub!
 
 ### Important Notes
