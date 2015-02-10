@@ -1,7 +1,21 @@
+"""
+A simple module for decoding and encoding the Gradespeed strings.
+"""
+
+
 keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
 
 
 def get_char_safe(string, index, func, oth):
+    """
+    A helper function to help with evaluating values with chars painlessly.
+
+    :param string: The string to retrieve the character from.
+    :param index: The index of the character desired from the string.
+    :param func: A function to call with the character retrieved.
+    :param oth: An alternate value to return if the function fails.
+    :return:
+    """
     try:
         return func(string[index])
     except Exception:
@@ -10,6 +24,12 @@ def get_char_safe(string, index, func, oth):
 
 
 def decode_string(to_dec):
+    """
+    Decodes an encoded string.
+
+    :param to_dec: The string to decode.
+    :return: The decoded string.
+    """
     output = ""
     i = 0
     while i < len(to_dec):
@@ -27,17 +47,23 @@ def decode_string(to_dec):
         chr2 = ((enc2 & 15) << 4) | (enc3 >> 2)
         chr3 = ((enc3 & 3) << 6) | enc4
 
-        output = output + chr(chr1)
+        output += chr(chr1)
         
         if enc3 != 64:
-            output = output + chr(chr2)
+            output += chr(chr2)
 
         if enc4 != 64:
-            output = output + chr(chr3)
+            output += chr(chr3)
     return output
 
 
 def encode_string(to_enc):
+    """
+    Encodes an decoded string.
+
+    :param to_enc: The string to encode.
+    :return: The encoded string.
+    """
     output = ""
     i = 0
     while i < len(to_enc):
@@ -59,6 +85,6 @@ def encode_string(to_enc):
         elif chr3 == 0:
             enc4 = 64
 
-        output = output + keyStr[enc1] + keyStr[enc2] + keyStr[enc3] + keyStr[enc4]
+        output += keyStr[enc1] + keyStr[enc2] + keyStr[enc3] + keyStr[enc4]
     return output
 
