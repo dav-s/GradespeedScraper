@@ -63,20 +63,21 @@ def login_gui(username, password):
 
 
 def specific_frame(gui, link):
+    # TODO: Handle resizing if there is too much information displayed.
     res = wrap.get_class_grades(link)
     main_frame = LabelFrame(gui, text=res["class_name"] + " - " + res["current_average"])
     for sec in res["sections"]:
         frame_name = sec["name"]
         if sec["average"]:
             frame_name += " - " + sec["average"]
-        temp_frame = LabelFrame(main_frame, text=frame_name)
+        temp_frame = LabelFrame(main_frame, text=frame_name, padx=20, pady=5)
         for i, h in enumerate(sec["grades"]["headers"]):
             Label(temp_frame, text=h).grid(row=1, column=i)
         for i, r in enumerate(sec["grades"]["rows"]):
             for j, c in enumerate(r):
                 Label(temp_frame, text=c).grid(row=i+2, column=j)
-        temp_frame.pack()
-    main_frame.pack()
+        temp_frame.pack(padx=20, pady=5)
+    main_frame.pack(padx=10, pady=(0, 10))
 
 
 def specific_gui(link):
@@ -92,7 +93,7 @@ def overview_frame(gui):
         gui.destroy()
         specific_gui(link)
     res = wrap.get_student_grades_overview()
-    frame = LabelFrame(gui, text=res["student_name"])
+    frame = LabelFrame(gui, text=res["student_name"], padx=20, pady=10)
     for i, t in enumerate(res["grades"]["headers"]):
         Label(frame, text=str(t)).grid(row=0, column=i)
     for i, r in enumerate(res["grades"]["rows"]):
@@ -102,7 +103,7 @@ def overview_frame(gui):
                     .grid(row=i+1, column=j)
             elif c:
                 Label(frame, text=str(c)).grid(row=i+1, column=j)
-    frame.pack()
+    frame.pack(padx=10, pady=10)
     gui.title(res["student_name"])
 
 
