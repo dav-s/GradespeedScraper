@@ -69,11 +69,7 @@ class Wrapper:
 
     def get_student_grades_overview(self, student_id=None):
         if student_id is not None:
-            is_in_list = False
-            for student in self.students:
-                if student[0] == student_id:
-                    is_in_list = True
-            if not is_in_list:
+            if student_id not in self.students:
                 raise Exception("A student with that id was not found!")
 
             self.br.select_form("aspnetForm")
