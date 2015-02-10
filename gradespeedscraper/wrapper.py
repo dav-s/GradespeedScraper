@@ -38,7 +38,7 @@ class Wrapper:
 
     def login(self, username, password):
         if self.logged_in:
-            raise Exception
+            raise Exception("You are already logged in!")
         if self.br.geturl() != self.start_url:
             self.br.open(self.start_url)
         self.br.open(self.start_url)
@@ -48,7 +48,7 @@ class Wrapper:
         self.br.submit()
 
         if self.br.geturl() == self.start_url:
-            raise Exception
+            raise Exception("Incorrect credentials.")
 
         soup = BeautifulSoup(self.br.response().read())
         sthtml = soup.find(id="_ctl0_ddlStudents")
@@ -64,19 +64,17 @@ class Wrapper:
 
     def get_available_students(self):
         if not self.logged_in:
-            raise Exception
+            raise Exception("You need to be logged in to get the students!")
         return self.students
 
     def get_student_grades_overview(self, student_id=None):
         if student_id is not None:
-            if len(self.students) <= 1:
-                raise Exception
             is_in_list = False
             for student in self.students:
                 if student[0] == student_id:
                     is_in_list = True
             if not is_in_list:
-                raise Exception
+                raise Exception("A student with that id was not found!")
 
             self.br.select_form("aspnetForm")
             self.br["_ctl0:ddlStudents"] = [student_id]
