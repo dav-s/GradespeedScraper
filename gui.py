@@ -1,10 +1,10 @@
 from gradespeedscraper.wrapper import Wrapper, Link
 from gradespeedscraper.tkgui_utils import center_gui
-from gradespeedscraper.stringcode import encode_string, decode_string
 from Tkinter import Tk, StringVar, BooleanVar, Frame, Label, LabelFrame, Button, Checkbutton, Entry
 #from ttk import Label, Frame, Checkbutton, Button, LabelFrame, Entry
 from config import main_url
 import os
+from base64 import encodestring, decodestring
 
 wrap = Wrapper(main_url)
 
@@ -15,7 +15,7 @@ def login_gui(username, password):
         temp_password = password_holder.get()
         if remember_login_holder.get():
             logon_file = open("dep.dat", "w")
-            logon_file.write(encode_string(temp_username+" "+temp_password))
+            logon_file.write(encodestring(temp_username+" "+temp_password))
             logon_file.close()
         elif os.path.isfile("dep.dat"):
             os.remove("dep.dat")
@@ -27,7 +27,7 @@ def login_gui(username, password):
     def on_checkbox_flip():
         if remember_login_holder.get():
             logon_file = open("dep.dat", "w")
-            logon_file.write(encode_string(username_holder.get()+" "+password_holder.get()))
+            logon_file.write(encodestring(username_holder.get()+" "+password_holder.get()))
             logon_file.close()
         else:
             if os.path.isfile("dep.dat"):
@@ -117,7 +117,7 @@ def overview_gui():
 def get_file_tuple():
     if os.path.isfile("dep.dat"):
         logon_file = open("dep.dat")
-        temp = decode_string(logon_file.read())
+        temp = decodestring(logon_file.read())
         logon_file.close()
         return str(temp).split(" ")[0], str(temp).split(" ")[1]
     return "", ""

@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import mechanize
-from stringcode import decode_string
+from base64 import decodestring
 
 
 class Link:
@@ -129,7 +129,7 @@ class Wrapper:
 
         soup = BeautifulSoup(self.br.response().read())
         script = soup.find(id="_ctl0_tdMainContent").find_all("script", language="Javascript")[0].string
-        decoded_soup = BeautifulSoup(decode_string(self.extract_string_from_script(script)).replace("&nbsp;", ""))
+        decoded_soup = BeautifulSoup(decodestring(self.extract_string_from_script(script)).replace("&nbsp;", ""))
 
         headers = [child.string for child in decoded_soup.find("tr", {"class": ["TableHeader"]}).children]
         rows = []
@@ -168,7 +168,7 @@ class Wrapper:
 
         soup = BeautifulSoup(self.br.open(self.grades_url+link.get_url()).read())
         script = soup.find(id="_ctl0_tdMainContent").find_all("script", language="Javascript")[1].string
-        decoded_soup = BeautifulSoup(decode_string(self.extract_string_from_script(script)).replace("&nbsp;", ""))
+        decoded_soup = BeautifulSoup(decodestring(self.extract_string_from_script(script)).replace("&nbsp;", ""))
 
         sections = []
         zipped_sections = zip(decoded_soup.find_all("span", {"class": ["CategoryName"]}),
